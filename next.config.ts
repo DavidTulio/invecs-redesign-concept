@@ -1,8 +1,31 @@
 import type { NextConfig } from "next";
 
-// Security headers for every route. The Content-Security-Policy is added in
-// Phase 3, once the Supabase and Turnstile domains it must allow are known.
+const isDev = process.env.NODE_ENV === "development";
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const turnstile = "https://challenges.cloudflare.com";
+
+// Content Security Policy: the browser only loads scripts, frames and connections
+// from the sources listed here. 'unsafe-inline' is needed for Next.js's inline
+// bootstrapping scripts on pre-rendered pages (nonces would force every page to be
+// rendered per request). Scripts from any other site are still blocked.
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline' ${turnstile}${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  `img-src 'self' data: blob: ${supabaseOrigin}`,
+  "font-src 'self'",
+  `connect-src 'self' ${supabaseOrigin} ${turnstile}${isDev ? " ws:" : ""}`,
+  `frame-src ${turnstile}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+].join("; ");
+
+// Security headers for every route.
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

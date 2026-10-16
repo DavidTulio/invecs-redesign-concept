@@ -11,24 +11,41 @@ A full-stack, mobile-first redesign of a Philippine used-car dealer's website, b
 
 - [x] Phase 1: setup, design tokens, layout, header/footer, home page
 - [x] Phase 2: database, Row Level Security, seed data, inventory filters, car pages
-- [ ] Phase 3: loan calculator and inquiries
+- [x] Phase 3: loan calculator, inquiry form with spam protection, branches page
 - [ ] Phase 4: admin
 - [ ] Phase 5: polish, security check and case study
 
 ## Run it locally
 
-1. Create a Supabase project. Turn **off** "Automatically expose new tables"; the migration grants access table by table.
-2. In Supabase → SQL Editor, run [`supabase/migrations/0001_initial_schema.sql`](supabase/migrations/0001_initial_schema.sql).
-3. Copy `.env.example` to `.env.local` and fill in the URL, publishable key and secret key (Project Settings → API Keys).
-4. Then:
+1. Create a Supabase project. Turn **off** "Automatically expose new tables"; the migrations grant access table by table.
+2. In Supabase → SQL Editor, run each file in [`supabase/migrations/`](supabase/migrations/) once, in number order (`0003` is optional).
+3. Create a Cloudflare Turnstile widget (hostname `localhost` for development).
+4. Copy `.env.example` to `.env.local` and fill in the Supabase URL, publishable key and secret key (Project Settings → API Keys) and the Turnstile site and secret keys.
+5. Then:
 
 ```bash
 npm install
 npm run db:seed   # loads the sample cars and uploads their photos
 npm run dev       # http://localhost:3000
+npm test          # unit tests (loan maths, form rules, filters)
 ```
 
-`npm run build` and `npm run lint` must pass before every commit.
+`npm run build`, `npm run lint` and `npm test` must pass before every commit.
+
+## Inquiry form security
+
+Each layer was tested with real attack attempts (direct API calls, tampered requests, bots and floods).
+
+| Threat | Protection |
+|---|---|
+| Bypassing the website and writing to the database directly | Visitors have no insert permission on `inquiries`; only the server (secret key) saves, after every check below |
+| SQL injection | Values are sent separately from the query (parameterised by Supabase/PostgREST); no SQL is built from input |
+| Spam bots | Cloudflare Turnstile verified on the server, hidden honeypot field, signed "too fast" time stamp |
+| Flooding | 5 attempts per visitor per 10 minutes, counted atomically in Postgres; IPs stored only as an HMAC hash |
+| Bad or oversized input | One Zod schema checked in the browser and again on the server, plus database constraints |
+| Script injection (XSS) | React renders input as text; Content Security Policy limits scripts to this site and Cloudflare |
+| Cross-site form posts (CSRF) | Next.js Server Actions reject requests from other origins |
+| Privacy | Only needed fields; inquiries auto-delete after 30 days |
 
 ## Concept safeguards
 
@@ -71,3 +88,9 @@ Car photos are from [Unsplash](https://unsplash.com) and used under the [Unsplas
 | 2008 Mitsubishi Montero Sport GLS 2.5 4x4 | [Sergio Gómez](https://unsplash.com/photos/BHGFpY_iHis) |
 | 1998 Ford F-150 XLT SuperCab | [Dan Williams](https://unsplash.com/photos/dyKsaQ2JfQQ) |
 | 2021 Nissan Navara VL 2.5 4x4 | [Šimom Caban](https://unsplash.com/photos/NrBc2oOaKU8) |
+
+## Notes for the case study
+
+Problems found on the original site, beyond the brief's list:
+
+- On the contact page, the link labelled "+63917-510-3858" actually dials +63920-963-3858.
