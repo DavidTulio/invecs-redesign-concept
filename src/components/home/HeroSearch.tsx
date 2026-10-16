@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState, type FormEvent, type ReactNode } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { Search } from "lucide-react";
+import { SelectField } from "@/components/ui/SelectField";
 import { formatPeso } from "@/lib/format";
 import { uniqueSorted } from "@/lib/inventory";
 import { BODY_TYPE_LABELS, BODY_TYPES, type BodyType, type Car } from "@/lib/types";
@@ -94,9 +95,8 @@ export function HeroSearch({ cars }: { cars: SearchCar[] }) {
         value={model}
         onChange={setModel}
         disabled={!make}
-        hint={make ? undefined : "Choose a make first"}
       >
-        <option value="">{make ? `Any ${make} model` : "Any model"}</option>
+        <option value="">{make ? `Any ${make} model` : "Choose a make first"}</option>
         {modelOptions.map((option) => (
           <option key={option}>{option}</option>
         ))}
@@ -124,55 +124,5 @@ export function HeroSearch({ cars }: { cars: SearchCar[] }) {
         </span>
       </button>
     </form>
-  );
-}
-
-function SelectField({
-  label,
-  name,
-  value,
-  onChange,
-  disabled,
-  hint,
-  children,
-}: {
-  label: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-  hint?: string;
-  children: ReactNode;
-}) {
-  const id = useId();
-  const hintId = `${id}-hint`;
-
-  return (
-    <div className="relative min-w-0 rounded-field bg-paper has-[select:disabled]:bg-paper/60">
-      <label htmlFor={id} className="block px-3 pt-2 text-xs text-muted">
-        {label}
-        {hint && (
-          <span id={hintId} className="sr-only">
-            . {hint}
-          </span>
-        )}
-      </label>
-      <select
-        id={id}
-        name={name}
-        value={value}
-        disabled={disabled}
-        aria-describedby={hint ? hintId : undefined}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full cursor-pointer appearance-none truncate bg-transparent pt-0.5 pr-9 pb-2.5 pl-3 text-[15px] font-semibold text-ink outline-offset-0 disabled:cursor-not-allowed disabled:text-muted"
-      >
-        {children}
-      </select>
-      <ChevronDown
-        aria-hidden
-        size={18}
-        className="pointer-events-none absolute right-3 bottom-3 text-muted"
-      />
-    </div>
   );
 }

@@ -2,13 +2,13 @@ import { BodyTypeShortcuts } from "@/components/home/BodyTypeShortcuts";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { LatestArrivals } from "@/components/home/LatestArrivals";
 import { WhyBuyHere } from "@/components/home/WhyBuyHere";
-import { sampleCars } from "@/data/sample-cars";
-import { bodyTypeSummaries, inStock, newestFirst } from "@/lib/inventory";
+import { getAllCars } from "@/lib/data/cars";
+import { bodyTypeSummaries, inStock } from "@/lib/inventory";
 
-export default function HomePage() {
-  // Phase 1: temporary local data. Phase 2 reads the same shape from Supabase.
-  const available = inStock(sampleCars);
-  const latest = newestFirst(available).slice(0, 6);
+export default async function HomePage() {
+  const available = inStock(await getAllCars()); // already newest first
+  const latest = available.slice(0, 6);
+  // Send the search form only the four fields it needs, not every description and photo.
   const searchCars = available.map(({ body_type, make, model, price_php }) => ({
     body_type,
     make,
