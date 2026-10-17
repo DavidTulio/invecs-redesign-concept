@@ -42,7 +42,8 @@ export function Turnstile({
       sitekey: siteKey,
       action,
       theme: "light",
-      size: "flexible",
+      // "flexible" needs at least 300px; very small phones get the compact square instead.
+      size: container.current.clientWidth < 300 ? "compact" : "flexible",
       callback: (token: string) => onTokenRef.current(token),
       "expired-callback": () => onTokenRef.current(null),
       "error-callback": () => onTokenRef.current(null),
