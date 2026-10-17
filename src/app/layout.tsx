@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Sans } from "next/font/google";
 import { ConceptBanner } from "@/components/site/ConceptBanner";
-import { SiteFooter } from "@/components/site/SiteFooter";
-import { SiteHeader } from "@/components/site/SiteHeader";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -37,6 +35,7 @@ export const viewport: Viewport = {
   themeColor: "#0e1a2b",
 };
 
+/** Shared by every page, public and admin: fonts, skip link and the concept banner. */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-PH" className={`${archivo.variable} ${plex.variable} h-full antialiased`}>
@@ -48,11 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <ConceptBanner />
-        <SiteHeader />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
+        {children}
       </body>
     </html>
   );

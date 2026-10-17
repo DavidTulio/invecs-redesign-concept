@@ -76,7 +76,7 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
   }
 
   // 5. CAPTCHA: confirm with Cloudflare that a human solved it.
-  const captchaPassed = await verifyTurnstile(String(formData.get("cf-turnstile-response") ?? ""), ip);
+  const captchaPassed = await verifyTurnstile(String(formData.get("cf-turnstile-response") ?? ""), ip, "inquiry");
   if (!captchaPassed) {
     return fail("Please complete the \"I'm human\" check, then send again.");
   }

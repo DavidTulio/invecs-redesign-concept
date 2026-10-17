@@ -110,3 +110,11 @@ export function fieldErrors(error: z.ZodError): Partial<Record<InquiryField, str
   }
   return errors;
 }
+
+export const INQUIRY_STATUSES = ["new", "contacted", "closed"] as const;
+export type InquiryStatus = (typeof INQUIRY_STATUSES)[number];
+export const INQUIRY_STATUS_LABELS: Record<InquiryStatus, string> = {
+  new: "New",
+  contacted: "Contacted",
+  closed: "Closed",
+};

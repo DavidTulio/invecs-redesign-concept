@@ -12,7 +12,7 @@ A full-stack, mobile-first redesign of a Philippine used-car dealer's website, b
 - [x] Phase 1: setup, design tokens, layout, header/footer, home page
 - [x] Phase 2: database, Row Level Security, seed data, inventory filters, car pages
 - [x] Phase 3: loan calculator, inquiry form with spam protection, branches page
-- [ ] Phase 4: admin
+- [x] Phase 4: admin (login, cars and photos, inquiries inbox, dashboard)
 - [ ] Phase 5: polish, security check and case study
 
 ## Run it locally
@@ -21,7 +21,11 @@ A full-stack, mobile-first redesign of a Philippine used-car dealer's website, b
 2. In Supabase → SQL Editor, run each file in [`supabase/migrations/`](supabase/migrations/) once, in number order (`0003` is optional).
 3. Create a Cloudflare Turnstile widget (hostname `localhost` for development).
 4. Copy `.env.example` to `.env.local` and fill in the Supabase URL, publishable key and secret key (Project Settings → API Keys) and the Turnstile site and secret keys.
-5. Then:
+5. Create the admin account: in Supabase → Authentication, turn **off** "Allow new users to sign up", add a user (email + password, auto-confirm), then run:
+   ```sql
+   insert into public.admins (user_id) select id from auth.users where email = 'you@example.com';
+   ```
+6. Then:
 
 ```bash
 npm install
@@ -88,6 +92,16 @@ Car photos are from [Unsplash](https://unsplash.com) and used under the [Unsplas
 | 2008 Mitsubishi Montero Sport GLS 2.5 4x4 | [Sergio Gómez](https://unsplash.com/photos/BHGFpY_iHis) |
 | 1998 Ford F-150 XLT SuperCab | [Dan Williams](https://unsplash.com/photos/dyKsaQ2JfQQ) |
 | 2021 Nissan Navara VL 2.5 4x4 | [Šimom Caban](https://unsplash.com/photos/NrBc2oOaKU8) |
+
+## Admin security
+
+The admin area (`/admin`) is checked three times on every request:
+
+1. **Proxy** (`src/proxy.ts`): sends signed-out visitors to the login page and keeps the session fresh.
+2. **`requireAdmin()`** at the top of every admin page and Server Action: verifies the login token and that the user is listed in `admins`.
+3. **Row Level Security** in Postgres: even with a valid login, only admins can change cars, photos or inquiries.
+
+Tested by calling admin Server Actions directly by ID while signed out, and by signing in as a non-admin user and calling the database API: every attempt was refused. Photo uploads are checked by their first bytes (JPG/PNG/WebP only, 5 MB max) and stored under random names.
 
 ## Notes for the case study
 

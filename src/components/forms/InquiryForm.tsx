@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { CheckCircle2, Send } from "lucide-react";
-import { submitInquiry, type InquiryState } from "@/app/test-drive/actions";
+import { submitInquiry, type InquiryState } from "@/actions/inquiry";
 import { formatPeso } from "@/lib/format";
 import {
   CONTACT_METHOD_LABELS,
