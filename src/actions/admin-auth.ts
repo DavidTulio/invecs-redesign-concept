@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { clientIp, hashIp } from "@/lib/server/form-guard";
 import { verifyTurnstile } from "@/lib/server/turnstile";
 import { createAdminClient } from "@/lib/supabase/admin";

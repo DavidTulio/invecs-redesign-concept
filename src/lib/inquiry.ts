@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 // One schema for the inquiry form, used by the browser (instant feedback) and
 // re-checked by the server (the only check that counts; browsers can be bypassed).

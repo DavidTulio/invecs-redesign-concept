@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 // Car loan estimate using the standard amortisation formula:
 //   M = P × r / (1 − (1 + r)^−n)

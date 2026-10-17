@@ -45,7 +45,9 @@
   }
 
   /* One visible focus style for every interactive element. */
-  :focus-visible {
+  :focus-visible,
+  /* Date fields move focus to their inner day/month/year parts, which :focus-visible misses. */
+  input[type="date"]:focus-within {
     outline: 2px solid var(--color-signal);
     outline-offset: 2px;
   }

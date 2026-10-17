@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { CAR_STATUSES, makeCarSchema, PHOTO_MAX_BYTES, sniffImageType, uuidSchema } from "@/lib/car-schema";
 import { CARS_TAG } from "@/lib/data/cars";
 import { requireAdmin } from "@/lib/server/auth";

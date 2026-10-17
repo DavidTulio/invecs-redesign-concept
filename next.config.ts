@@ -57,6 +57,9 @@ const nextConfig: NextConfig = {
     },
   },
   experimental: {
+    // Tailwind CSS is small, so ship it inside the HTML: phones can paint without
+    // waiting for a separate stylesheet request (helps first-time mobile visitors).
+    inlineCss: true,
     // Photo uploads: 5 MB per file plus form overhead. Everything else stays tiny.
     serverActions: { bodySizeLimit: "6mb" },
   },

@@ -7,7 +7,7 @@ import { OFFICIAL_CONTACT } from "@/lib/site";
  */
 export function DemoNotice({ children }: { children: React.ReactNode }) {
   return (
-    <aside className="flex gap-3 rounded-card border border-[#f0d58a] bg-[#fff8e6] p-4 text-sm leading-relaxed text-ink">
+    <aside aria-label="Demo notice" className="flex gap-3 rounded-card border border-[#f0d58a] bg-[#fff8e6] p-4 text-sm leading-relaxed text-ink">
       <Info aria-hidden size={20} className="mt-0.5 shrink-0 text-warn" />
       <div className="min-w-0">
         <p className="font-semibold">{children}</p>

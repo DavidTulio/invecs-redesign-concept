@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { formatPeso, formatPesoShort } from "./format";
 import { inStock } from "./inventory";
 import {

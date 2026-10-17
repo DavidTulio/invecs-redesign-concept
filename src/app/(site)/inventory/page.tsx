@@ -36,7 +36,7 @@ async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, 
   return (
     <FilterNavProvider filters={filters}>
       <div className="mt-6 grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside aria-label="Filters" className="lg:sticky lg:top-24 lg:self-start">
           <FilterPanel facets={facets} activeCount={chips.length} resultCount={results.length} />
         </aside>
 

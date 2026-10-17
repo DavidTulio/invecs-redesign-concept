@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { BODY_TYPES, FUELS, TRANSMISSIONS } from "./types";
 
 export const CAR_STATUSES = ["available", "reserved", "sold"] as const;

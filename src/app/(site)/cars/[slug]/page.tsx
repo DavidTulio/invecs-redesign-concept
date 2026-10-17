@@ -60,7 +60,7 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
         </div>
 
         {/* Summary: on phones it sits right under the photos; on desktop it stays in view. */}
-        <aside className="lg:sticky lg:top-24 lg:row-span-2 lg:self-start">
+        <aside aria-label="Price and key details" className="lg:sticky lg:top-24 lg:row-span-2 lg:self-start">
           <div className="flex flex-wrap items-center gap-2">
             {car.status !== "available" && <StatusBadge status={car.status} />}
           </div>

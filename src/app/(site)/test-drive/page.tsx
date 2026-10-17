@@ -35,8 +35,10 @@ export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">
         </div>
       </div>
 
-      <aside className="lg:pt-16">
-        <h2 className="font-wide text-lg font-bold">What happens next</h2>
+      <aside aria-labelledby="next-steps-title" className="lg:pt-16">
+        <h2 id="next-steps-title" className="font-wide text-lg font-bold">
+          What happens next
+        </h2>
         <ol className="mt-4 grid gap-4 text-[15px]">
           {[
             ["Send your request", "Choose a car, a date and how to reach you."],

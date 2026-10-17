@@ -1,7 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { uuidSchema } from "@/lib/car-schema";
 import { INQUIRY_STATUSES } from "@/lib/inquiry";
 import { requireAdmin } from "@/lib/server/auth";
