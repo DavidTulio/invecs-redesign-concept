@@ -15,10 +15,10 @@ const CHECKS = [
 
 export function WhyBuyHere() {
   return (
-    <section aria-labelledby="why-title" className="container-site py-12 sm:py-16">
+    <section aria-labelledby="why-title" className="container-site section-y">
       <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-14">
         <div className="lg:sticky lg:top-24 lg:self-start lg:pt-2">
-          <h2 id="why-title" className="font-wide text-2xl font-bold text-balance sm:text-[28px]">
+          <h2 id="why-title" className="section-title">
             Checked before it&apos;s listed
           </h2>
           <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed text-muted">

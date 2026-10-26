@@ -82,3 +82,24 @@
     padding-inline: 1.5rem;
   }
 }
+
+/* Section rhythm: every home section uses the same spacing and heading size. */
+@utility section-y {
+  padding-block: 3rem;
+
+  @media (width >= 40rem) {
+    padding-block: 4.5rem;
+  }
+}
+
+@utility section-title {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  font-weight: 700;
+
+  @media (width >= 40rem) {
+    font-size: 1.75rem;
+  }
+}

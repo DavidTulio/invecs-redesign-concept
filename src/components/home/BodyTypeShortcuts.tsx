@@ -8,8 +8,8 @@ import { BODY_TYPE_LABELS } from "@/lib/types";
 /** Live counts per body type. Types with 0 cars are already filtered out. */
 export function BodyTypeShortcuts({ summaries }: { summaries: BodyTypeSummary[] }) {
   return (
-    <section aria-labelledby="body-types-title" className="container-site py-12 sm:py-16">
-      <h2 id="body-types-title" className="font-wide text-2xl font-bold sm:text-[28px]">
+    <section aria-labelledby="body-types-title" className="container-site section-y">
+      <h2 id="body-types-title" className="section-title">
         Shop by body type
       </h2>
 

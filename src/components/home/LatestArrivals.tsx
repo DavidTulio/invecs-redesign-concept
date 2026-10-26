@@ -6,11 +6,11 @@ import type { Car } from "@/lib/types";
 
 export function LatestArrivals({ cars, total }: { cars: Car[]; total: number }) {
   return (
-    <section aria-labelledby="latest-title" className="bg-soft py-12 sm:py-16">
+    <section aria-labelledby="latest-title" className="section-y bg-soft">
       <div className="container-site">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
           <div>
-            <h2 id="latest-title" className="font-wide text-2xl font-bold sm:text-[28px]">
+            <h2 id="latest-title" className="section-title">
               Latest arrivals
             </h2>
             <p className="mt-1 max-w-[60ch] text-sm text-muted">
