@@ -1,43 +1,60 @@
-import { CalendarCheck, ClipboardCheck, MessageCircle, ReceiptText } from "lucide-react";
+import { Check } from "lucide-react";
 
-const POINTS = [
-  {
-    icon: ClipboardCheck,
-    title: "Inspected before listing",
-    body: "Engine, underchassis and papers are checked before a car goes online. The full feature list is on every car page.",
-  },
-  {
-    icon: ReceiptText,
-    title: "Clear prices, monthly estimate",
-    body: "Every car shows its cash price and a monthly estimate. You can adjust the down payment and term in the loan calculator.",
-  },
-  {
-    icon: CalendarCheck,
-    title: "Test drive on your schedule",
-    body: "Pick a car and a preferred date online. We confirm by your chosen contact method.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Talk to a real person",
-    body: "Reach us by call, Viber, Messenger or email, whichever is easiest for you.",
-  },
+// The worries Filipino used-car buyers actually have (papers, flood damage, hidden loans,
+// stolen cars), answered as a pre-listing inspection sheet instead of generic icons.
+const CHECKS = [
+  { item: "Original OR/CR verified", detail: "Engine and chassis numbers match the Official Receipt and Certificate of Registration." },
+  { item: "HPG clearance", detail: "PNP Highway Patrol Group check that the car isn't reported stolen." },
+  { item: "No unpaid car loan", detail: "Any bank mortgage on the car is released before it's sold." },
+  { item: "Flood check", detail: "Carpets, under-seat rust and the electricals are checked for water damage." },
+  { item: "Accident and repaint check", detail: "Panel gaps and paint thickness show past repairs." },
+  { item: "Engine and transmission", detail: "Test-driven before listing: starting, shifting, braking, no warning lights." },
+  { item: "Underchassis and suspension", detail: "Checked on a lift for rust, leaks and worn parts." },
+  { item: "Service history", detail: "Casa (dealer service) records are included when available." },
 ] as const;
 
 export function WhyBuyHere() {
   return (
     <section aria-labelledby="why-title" className="container-site py-12 sm:py-16">
-      <h2 id="why-title" className="font-wide text-2xl font-bold sm:text-[28px]">
-        Why buy at INVECS
-      </h2>
-      <ul className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-        {POINTS.map(({ icon: Icon, title, body }) => (
-          <li key={title} className="grid content-start gap-2">
-            <Icon aria-hidden size={26} strokeWidth={1.75} className="text-signal" />
-            <h3 className="mt-1 text-base font-semibold">{title}</h3>
-            <p className="text-[15px] leading-relaxed text-muted">{body}</p>
-          </li>
-        ))}
-      </ul>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-14">
+        <div className="lg:sticky lg:top-24 lg:self-start lg:pt-2">
+          <h2 id="why-title" className="font-wide text-2xl font-bold text-balance sm:text-[28px]">
+            Checked before it&apos;s listed
+          </h2>
+          <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed text-muted">
+            Buying a used car shouldn&apos;t feel like a gamble. Every car goes through the same
+            8-point check before it appears here, so the papers, the history and the car itself
+            are sorted before you visit.
+          </p>
+          <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed text-muted">
+            Then see every feature on the car&apos;s page, and ask us anything by call, Viber,
+            Messenger or email.
+          </p>
+        </div>
+
+        <div className="min-w-0">
+          <div className="overflow-hidden rounded-card border border-line">
+            <div className="flex items-baseline justify-between gap-4 border-b border-line bg-soft px-5 py-3">
+              <p className="text-[12px] font-semibold tracking-[0.12em] text-ink-2 uppercase">Pre-listing inspection</p>
+              <p className="text-[12px] font-semibold text-muted tabular-nums">{CHECKS.length} points</p>
+            </div>
+            <ul className="divide-y divide-line">
+              {CHECKS.map(({ item, detail }) => (
+                <li key={item} className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-3 px-5 py-3.5">
+                  <span className="mt-0.5 grid size-6 place-items-center rounded-full bg-[#e6f4ed] text-ok">
+                    <Check aria-hidden size={15} strokeWidth={2.5} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-semibold">{item}</p>
+                    <p className="text-sm text-muted">{detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="mt-2 text-xs text-muted">Sample checklist for this concept.</p>
+        </div>
+      </div>
     </section>
   );
 }
