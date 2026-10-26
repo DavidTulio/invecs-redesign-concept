@@ -50,8 +50,14 @@ describe("inquiry schema", () => {
     expect(result.name).toBe("Juan dela Cruz");
   });
 
-  it("allows a general question with no car or date", () => {
-    expect(schema.safeParse({ ...valid, car: "", preferred_date: "" }).success).toBe(true);
+  it("allows an inquiry with no specific car", () => {
+    expect(schema.safeParse({ ...valid, car: "" }).success).toBe(true);
+  });
+
+  it("requires a test-drive date", () => {
+    for (const preferred_date of ["", undefined, "next week"]) {
+      expect(errorsFor({ ...valid, preferred_date }).preferred_date).toBe("Choose a test-drive date");
+    }
   });
 
   it("requires a phone number for calls and Viber", () => {

@@ -72,10 +72,9 @@ export function makeInquirySchema(now = new Date()) {
       preferred_date: z.preprocess(
         emptyToUndefined,
         z
-          .string()
-          .regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a date")
-          .refine((d) => d >= firstDay && d <= lastDay, `Choose a date from tomorrow up to ${BOOKING_WINDOW_DAYS} days ahead`)
-          .optional(),
+          .string({ error: "Choose a test-drive date" })
+          .regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a test-drive date")
+          .refine((d) => d >= firstDay && d <= lastDay, `Choose a date from tomorrow up to ${BOOKING_WINDOW_DAYS} days ahead`),
       ),
       message: z
         .string()

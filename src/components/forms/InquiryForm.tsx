@@ -201,6 +201,7 @@ export function InquiryForm({
       <Field
         id="preferred_date"
         label="Preferred test-drive date"
+        required
         hint="We'll confirm the exact time with you."
         error={errors.preferred_date}
       >
@@ -208,6 +209,7 @@ export function InquiryForm({
           {...describedBy("preferred_date", errors.preferred_date, "hint")}
           name="preferred_date"
           type="date"
+          required
           min={minDate}
           max={maxDate}
           defaultValue={values.preferred_date}

@@ -101,7 +101,7 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
     phone: inquiry.phone ?? null,
     email: inquiry.email ?? null,
     contact_method: inquiry.contact_method,
-    preferred_date: inquiry.preferred_date ?? null,
+    preferred_date: inquiry.preferred_date,
     message: inquiry.message,
   });
   if (insertError) {
