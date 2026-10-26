@@ -66,6 +66,8 @@ All cars, prices, mileages and descriptions are **sample data** ([`scripts/seed-
 
 Car photos are from [Unsplash](https://unsplash.com) and used under the [Unsplash License](https://unsplash.com/license). Each photo was checked to show the same model as its sample listing, but it is not the actual car for sale.
 
+Home page header photo: [Ivan Kazlouskij](https://unsplash.com/photos/euFJPwObDWI) (dealer lot).
+
 | Car | Photographer |
 |---|---|
 | 2023 Ford Everest Titanium+ 2.0 Bi-Turbo 4x4 | [Duc Van](https://unsplash.com/photos/gCE639_EJXk) |

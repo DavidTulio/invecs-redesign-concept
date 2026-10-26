@@ -54,7 +54,7 @@ export function HeroSearch({ cars }: { cars: SearchCar[] }) {
       onSubmit={onSubmit}
       role="search"
       aria-label="Find a car"
-      className="grid gap-2 rounded-card bg-soft p-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto]"
+      className="grid gap-2 rounded-card bg-soft p-2 sm:grid-cols-2"
     >
       <SelectField
         label="Body type"
@@ -114,7 +114,7 @@ export function HeroSearch({ cars }: { cars: SearchCar[] }) {
       <button
         type="submit"
         disabled={matches.length === 0}
-        className="flex min-h-14 items-center justify-center gap-2 rounded-field bg-signal px-6 font-semibold text-white transition-colors hover:bg-signal-dark disabled:cursor-not-allowed disabled:bg-muted sm:col-span-2 lg:col-span-1"
+        className="flex min-h-14 items-center justify-center gap-2 rounded-field bg-signal px-6 font-semibold text-white transition-colors hover:bg-signal-dark disabled:cursor-not-allowed disabled:bg-muted sm:col-span-2"
       >
         <Search aria-hidden size={18} />
         <span aria-live="polite" className="tabular-nums">
