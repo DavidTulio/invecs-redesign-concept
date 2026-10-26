@@ -1,0 +1,39 @@
+# Safety checks on every push and pull request, plus a weekly run so newly
+# published vulnerabilities show up even when no one is changing the code.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 0 * * 1" # Mondays, 08:00 Philippine time
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      # Fail on high or critical issues in code that runs in production.
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      # Report (but don't fail on) issues in development-only tools.
+      - name: Audit all dependencies (report only)
+        run: npm audit || true
+      - name: Verify package signatures
+        run: npm audit signatures
+      - name: Generate route types
+        run: npx next typegen
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test

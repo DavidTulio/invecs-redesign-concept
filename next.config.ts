@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
       ? [new URL(`${supabaseUrl}/storage/v1/object/public/car-photos/**`)]
       : [],
     formats: ["image/avif", "image/webp"],
+    // Hardening (see SECURITY.md): never optimise SVGs (they can carry scripts and were
+    // the attack path in GHSA-2464-fhr4-w9xw), and serve optimised images as downloads
+    // if opened directly, so a crafted file can't run as a page on our domain.
+    dangerouslyAllowSVG: false,
+    contentDispositionType: "attachment",
   },
   turbopack: {
     rules: {

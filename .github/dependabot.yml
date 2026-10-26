@@ -1,0 +1,24 @@
+# Dependabot keeps dependencies patched. It opens a pull request when an update is
+# available; Vercel builds a preview for each one so it can be checked before merging.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: Asia/Manila
+    open-pull-requests-limit: 5
+    groups:
+      # Next.js and React ship security fixes together; update them as one PR.
+      next-and-react:
+        patterns: ["next", "eslint-config-next", "@next/*", "react", "react-dom", "@types/react", "@types/react-dom"]
+      supabase:
+        patterns: ["@supabase/*"]
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

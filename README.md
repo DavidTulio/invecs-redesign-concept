@@ -31,7 +31,7 @@ A full-stack, mobile-first redesign of a Philippine used-car dealer's website, b
 npm install
 npm run db:seed   # loads the sample cars and uploads their photos
 npm run dev       # http://localhost:3000
-npm test          # unit tests (loan maths, form rules, filters)
+npm test          # unit tests (loan maths, form rules, filters, car schema)
 ```
 
 `npm run build`, `npm run lint` and `npm test` must pass before every commit.
@@ -92,6 +92,10 @@ Car photos are from [Unsplash](https://unsplash.com) and used under the [Unsplas
 | 2008 Mitsubishi Montero Sport GLS 2.5 4x4 | [Sergio Gómez](https://unsplash.com/photos/BHGFpY_iHis) |
 | 1998 Ford F-150 XLT SuperCab | [Dan Williams](https://unsplash.com/photos/dyKsaQ2JfQQ) |
 | 2021 Nissan Navara VL 2.5 4x4 | [Šimom Caban](https://unsplash.com/photos/NrBc2oOaKU8) |
+
+## Keeping it secure
+
+Dependencies are pinned to exact versions, Dependabot opens pull requests for updates, and a GitHub Actions check runs `npm audit`, type checks, lint and tests on every push and every Monday. See [SECURITY.md](SECURITY.md) for the update routine and the security update log.
 
 ## Admin security
 
