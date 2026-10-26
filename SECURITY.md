@@ -43,3 +43,4 @@ If you find a security issue, please don't open a public GitHub issue. Contact t
 | Date | Change |
 |---|---|
 | 2026-10-26 | Next.js 16.4.0 → 16.4.3 and React 19.3.0 → 19.3.1, fixing GHSA-2464-fhr4-w9xw (image optimisation RCE), GHSA-673q-mjm6-r5xr (`use cache` RCE) and GHSA-p3m5-59mp-jv5r (Server Actions DoS). Pinned all dependencies to exact versions; added Dependabot, the CI workflow and this file. |
+| 2026-10-26 | Added `@google/model-viewer` 4.3.1 and `three` 0.183.2 (exact) for the 3D body-type turntable; `npm audit` 0 vulnerabilities. CSP `script-src` gains `'wasm-unsafe-eval'`, which allows WebAssembly compilation only; JavaScript `eval` stays blocked in production. Models are self-hosted in `public/models/`, so no new outside origins. |

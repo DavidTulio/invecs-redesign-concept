@@ -10,7 +10,8 @@ const turnstile = "https://challenges.cloudflare.com";
 // rendered per request). Scripts from any other site are still blocked.
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' ${turnstile}${isDev ? " 'unsafe-eval'" : ""}`,
+  // 'wasm-unsafe-eval' lets the 3D car viewer compile WebAssembly; plain JS eval stays blocked.
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${turnstile}${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${supabaseOrigin}`,
   "font-src 'self'",

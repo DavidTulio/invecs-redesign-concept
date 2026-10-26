@@ -103,3 +103,10 @@
     font-size: 1.75rem;
   }
 }
+
+/* Showroom stage behind the body-type turntable: a back wall, a floor and a soft ceiling light. */
+@utility showroom {
+  background:
+    radial-gradient(ellipse 55% 75% at 50% 0%, rgb(255 255 255 / 0.95), transparent 70%),
+    linear-gradient(to bottom, #eef1f5 0 50%, #dde2e9 50% 100%);
+}

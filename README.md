@@ -62,7 +62,9 @@ Each layer was tested with real attack attempts (direct API calls, tampered requ
 
 All cars, prices, mileages and descriptions are **sample data** ([`scripts/seed-data.ts`](scripts/seed-data.ts)), modelled on the kinds of cars the dealer lists. They are not real listings.
 
-## Photo credits
+## Photo and 3D model credits
+
+3D cars in "Shop by body type": the SUV, pickup and sedan from ["Generic passenger car pack"](https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5) by comrade1280, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: taken out of the pack, textures removed and recoloured grey, turned to face forward, a turntable disc added, and compressed (`public/models/`). The still pictures in `src/assets/showroom/` are renders of the same models.
 
 Car photos are from [Unsplash](https://unsplash.com) and used under the [Unsplash License](https://unsplash.com/license). Each photo was checked to show the same model as its sample listing, but it is not the actual car for sale.
 

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import heroLot from "@/assets/hero-lot.jpg";
-import { BodyTypeShortcuts } from "@/components/home/BodyTypeShortcuts";
+import { BodyTypeShowroom } from "@/components/home/BodyTypeShowroom";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { LatestArrivals } from "@/components/home/LatestArrivals";
 import { WhyBuyHere } from "@/components/home/WhyBuyHere";
@@ -57,7 +57,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <BodyTypeShortcuts summaries={bodyTypeSummaries(available)} />
+      <BodyTypeShowroom summaries={bodyTypeSummaries(available)} />
       <LatestArrivals cars={latest} total={available.length} />
       <WhyBuyHere />
     </>
