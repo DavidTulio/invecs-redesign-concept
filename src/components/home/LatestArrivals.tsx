@@ -28,7 +28,8 @@ export function LatestArrivals({ cars, total }: { cars: Car[]; total: number }) 
           </Link>
         </div>
 
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Grey section: the price-tag notches take this background colour. */}
+        <ul className="mt-6 grid gap-4 [--tag-bg:var(--color-soft)] sm:grid-cols-2 lg:grid-cols-3">
           {cars.map((car) => (
             <li key={car.id} className="flex">
               <CarCard car={car} />

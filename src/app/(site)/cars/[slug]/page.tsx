@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { Calculator, CalendarCheck, Check, ChevronLeft } from "lucide-react";
 import { CarCard } from "@/components/cars/CarCard";
 import { Gallery } from "@/components/cars/Gallery";
+import { PriceTag, TearLine } from "@/components/cars/PriceTag";
 import { StatusBadge } from "@/components/cars/StatusBadge";
 import { getAllCars, getCarBySlug } from "@/lib/data/cars";
 import { formatKm, formatPeso } from "@/lib/format";
 import { similarCars } from "@/lib/inventory";
-import { estimateMonthly, LOAN_DEFAULTS } from "@/lib/loan";
+import { LOAN_DEFAULTS } from "@/lib/loan";
 import { BODY_TYPE_LABELS, carTitle, FUEL_LABELS, TRANSMISSION_LABELS } from "@/lib/types";
 
 export async function generateStaticParams() {
@@ -31,7 +32,6 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
   if (!car) notFound();
 
   const title = carTitle(car);
-  const monthly = estimateMonthly(car.price_php);
   const similar = similarCars(car, cars);
   const sold = car.status === "sold";
 
@@ -67,47 +67,49 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
           <h1 className="font-wide mt-2 text-[28px] leading-tight font-extrabold">{title}</h1>
           <p className="mt-1 text-muted">{car.variant}</p>
 
-          <div className="mt-5 rounded-card border border-line p-5">
-            <p className="font-display text-[32px] leading-none font-extrabold tabular-nums">
-              {formatPeso(car.price_php)}
-            </p>
-            {!sold && (
-              <p className="mt-2 text-sm tabular-nums">
-                <span className="font-semibold text-signal">≈ {formatPeso(monthly)}/month</span>{" "}
-                <span className="text-muted">
-                  with {LOAN_DEFAULTS.downPaymentPct}% down over {LOAN_DEFAULTS.termMonths} months. Estimate only.
-                </span>
-              </p>
-            )}
+          {/* The same hang-tag shape as the listing cards, at full size. */}
+          <div className="mt-5 overflow-hidden rounded-card border border-line">
+            <div className="p-5">
+              <PriceTag price={car.price_php} size="large" showMonthly={!sold} />
+            </div>
+            <TearLine />
+            <div className="p-5">
+              {!sold && (
+                <p className="text-sm text-muted tabular-nums">
+                  Monthly estimate with {LOAN_DEFAULTS.downPaymentPct}% down over {LOAN_DEFAULTS.termMonths} months.
+                  Estimate only.
+                </p>
+              )}
 
-            {sold ? (
-              <div className="mt-4 rounded-field bg-soft p-3 text-sm">
-                <p className="font-semibold">This car has been sold.</p>
-                <p className="mt-1 text-muted">See similar cars below that are still available.</p>
-              </div>
-            ) : (
-              <div className="mt-5 grid gap-2">
-                {car.status === "reserved" && (
-                  <p className="rounded-field bg-[#fff3d6] p-3 text-sm text-warn">
-                    Reserved by another buyer. Ask us to put you next in line.
-                  </p>
-                )}
-                <Link
-                  href={`/test-drive?car=${car.slug}`}
-                  className="flex items-center justify-center gap-2 rounded-field bg-signal px-4 py-3 font-semibold text-white hover:bg-signal-dark"
-                >
-                  <CalendarCheck aria-hidden size={18} />
-                  {car.status === "reserved" ? "Ask to be next in line" : "Book a test drive"}
-                </Link>
-                <Link
-                  href={`/loan-calculator?price=${car.price_php}&car=${car.slug}`}
-                  className="flex items-center justify-center gap-2 rounded-field border border-line px-4 py-3 font-semibold hover:border-ink"
-                >
-                  <Calculator aria-hidden size={18} />
-                  Adjust the loan estimate
-                </Link>
-              </div>
-            )}
+              {sold ? (
+                <div className="rounded-field bg-soft p-3 text-sm">
+                  <p className="font-semibold">This car has been sold.</p>
+                  <p className="mt-1 text-muted">See similar cars below that are still available.</p>
+                </div>
+              ) : (
+                <div className="mt-5 grid gap-2">
+                  {car.status === "reserved" && (
+                    <p className="rounded-field bg-[#fff3d6] p-3 text-sm text-warn">
+                      Reserved by another buyer. Ask us to put you next in line.
+                    </p>
+                  )}
+                  <Link
+                    href={`/test-drive?car=${car.slug}`}
+                    className="flex items-center justify-center gap-2 rounded-field bg-signal px-4 py-3 font-semibold text-white hover:bg-signal-dark"
+                  >
+                    <CalendarCheck aria-hidden size={18} />
+                    {car.status === "reserved" ? "Ask to be next in line" : "Book a test drive"}
+                  </Link>
+                  <Link
+                    href={`/loan-calculator?price=${car.price_php}&car=${car.slug}`}
+                    className="flex items-center justify-center gap-2 rounded-field border border-line px-4 py-3 font-semibold hover:border-ink"
+                  >
+                    <Calculator aria-hidden size={18} />
+                    Adjust the loan estimate
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
           <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
