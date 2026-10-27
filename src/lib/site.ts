@@ -1,5 +1,8 @@
 export const OFFICIAL_SITE_URL = "https://www.invecs.ph/";
 
+/** This concept's own address, for absolute links in shares and link previews. */
+export const SITE_URL = "https://invecs-redesign-concept.vercel.app";
+
 export const SITE_NAME = "INVECS Autocentrum";
 
 export const NAV_LINKS = [

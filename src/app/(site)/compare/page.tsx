@@ -5,8 +5,9 @@ import { ArrowRight, Check, Minus } from "lucide-react";
 import { CarImage } from "@/components/cars/CarImage";
 import { StatusBadge } from "@/components/cars/StatusBadge";
 import { CompareRemove, CompareSync } from "@/components/compare/CompareControls";
+import { ShareButton } from "@/components/share/ShareButton";
 import { getAllCars } from "@/lib/data/cars";
-import { allSame, bestByRow, COMPARE_MAX, featureUnion, parseCompareParam } from "@/lib/compare";
+import { allSame, bestByRow, COMPARE_MAX, compareHref, featureUnion, parseCompareParam } from "@/lib/compare";
 import { formatKm, formatPeso } from "@/lib/format";
 import { estimateMonthly, LOAN_DEFAULTS } from "@/lib/loan";
 import { BODY_TYPE_LABELS, carTitle, FUEL_LABELS, TRANSMISSION_LABELS, type Car } from "@/lib/types";
@@ -89,12 +90,21 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
             <input id="diff-only" type="checkbox" className="size-5 accent-[var(--color-ink)]" />
             Show only differences
           </label>
-          {cars.length < COMPARE_MAX && (
-            <Link href="/saved" className="inline-flex min-h-11 items-center gap-1 font-semibold text-signal hover:underline">
-              Add from saved cars
-              <ArrowRight aria-hidden size={16} />
-            </Link>
-          )}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {cars.length < COMPARE_MAX && (
+              <Link href="/saved" className="inline-flex min-h-11 items-center gap-1 font-semibold text-signal hover:underline">
+                Add from saved cars
+                <ArrowRight aria-hidden size={16} />
+              </Link>
+            )}
+            <ShareButton
+              path={compareHref(ids)}
+              title="Car comparison"
+              text={`Comparing ${cars.map((car) => carTitle(car)).join(" vs ")} (sample listings, redesign concept)`}
+              label="Share this comparison"
+              className="min-h-11 rounded-field border border-line px-3 text-sm hover:border-ink"
+            />
+          </div>
         </div>
 
         {/* Phones: the table scrolls sideways while the row names stay put. "relative" keeps

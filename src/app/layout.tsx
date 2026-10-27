@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Sans } from "next/font/google";
 import { ConceptBanner } from "@/components/site/ConceptBanner";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -16,12 +17,14 @@ const plex = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "INVECS Autocentrum (redesign concept)",
     template: "%s · INVECS Autocentrum (redesign concept)",
   },
   description:
     "Unofficial portfolio redesign concept of INVECS Autocentrum's used-car website by David Tulio. Not affiliated with INVECS Autocentrum.",
+  openGraph: { siteName: "INVECS Autocentrum (redesign concept)", locale: "en_PH", type: "website" },
   // Concept safeguard: keep every page out of search engines.
   robots: {
     index: false,

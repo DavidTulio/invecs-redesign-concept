@@ -6,11 +6,13 @@ import { CarCard } from "@/components/cars/CarCard";
 import { Gallery } from "@/components/cars/Gallery";
 import { CompareButton } from "@/components/compare/CompareButton";
 import { FavouriteButton } from "@/components/favourites/FavouriteButton";
+import { ShareButton } from "@/components/share/ShareButton";
 import { PriceTag, TearLine } from "@/components/cars/PriceTag";
 import { StatusBadge } from "@/components/cars/StatusBadge";
 import { getAllCars, getCarBySlug } from "@/lib/data/cars";
 import { formatKm, formatPeso } from "@/lib/format";
 import { similarCars } from "@/lib/inventory";
+import { carPhotoUrl } from "@/lib/supabase/public";
 import { LOAN_DEFAULTS } from "@/lib/loan";
 import { BODY_TYPE_LABELS, carTitle, FUEL_LABELS, TRANSMISSION_LABELS } from "@/lib/types";
 
@@ -22,9 +24,19 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/cars/[slug]">): Promise<Metadata> {
   const car = await getCarBySlug((await params).slug);
   if (!car) return { title: "Car not found" };
+  const title = `${carTitle(car)} ${car.variant}`;
+  const description = `${formatPeso(car.price_php)} · ${formatKm(car.mileage_km)} · ${car.description.slice(0, 120)}`;
+  const photo = car.photos[0];
   return {
-    title: `${carTitle(car)} ${car.variant}`,
-    description: `${formatPeso(car.price_php)} · ${formatKm(car.mileage_km)} · ${car.description.slice(0, 120)}`,
+    title,
+    description,
+    // What Messenger, Viber and others show as the link preview.
+    openGraph: {
+      title: `${title} · ${formatPeso(car.price_php)}`,
+      description: `Sample listing on an unofficial redesign concept. ${formatKm(car.mileage_km)}.`,
+      url: `/cars/${car.slug}`,
+      images: photo ? [{ url: carPhotoUrl(photo.path), alt: photo.alt }] : undefined,
+    },
   };
 }
 
@@ -110,9 +122,15 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
                     <Calculator aria-hidden size={18} />
                     Adjust the loan estimate
                   </Link>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <FavouriteButton slug={car.slug} title={`${title} ${car.variant}`} price={car.price_php} variant="page" />
                     <CompareButton slug={car.slug} title={`${title} ${car.variant}`} variant="page" />
+                    <ShareButton
+                      path={`/cars/${car.slug}`}
+                      title={`${title} ${car.variant}`}
+                      text={`${title} ${car.variant} · ${formatPeso(car.price_php)} (sample listing, redesign concept)`}
+                      className="min-h-12 rounded-field border border-line px-2 hover:border-ink"
+                    />
                   </div>
                 </div>
               )}
