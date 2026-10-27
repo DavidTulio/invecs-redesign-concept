@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NAV_LINKS, TEST_DRIVE_LINK } from "@/lib/site";
+import { SavedLink } from "@/components/favourites/SavedLink";
 import { MobileNav } from "./MobileNav";
 import { Wordmark } from "./Wordmark";
 
@@ -22,6 +23,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <SavedLink />
           <Link
             href={TEST_DRIVE_LINK.href}
             className="hidden rounded-field bg-signal px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-signal-dark sm:inline-block"

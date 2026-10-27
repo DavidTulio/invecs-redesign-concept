@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatKm } from "@/lib/format";
 import { carTitle, FUEL_LABELS, TRANSMISSION_LABELS, type Car } from "@/lib/types";
 import { CompareButton } from "@/components/compare/CompareButton";
+import { FavouriteButton } from "@/components/favourites/FavouriteButton";
 import { CarImage } from "./CarImage";
 import { PriceTag, TearLine } from "./PriceTag";
 import { StatusBadge } from "./StatusBadge";
@@ -17,8 +18,9 @@ export function CarCard({ car, preload = false }: { car: Car; preload?: boolean 
         {car.status !== "available" && (
           <StatusBadge status={car.status} className="absolute top-3 left-3" />
         )}
-        <div className="absolute top-2.5 right-2.5">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-2">
           <CompareButton slug={car.slug} title={`${carTitle(car)} ${car.variant}`} />
+          <FavouriteButton slug={car.slug} title={`${carTitle(car)} ${car.variant}`} price={car.price_php} />
         </div>
       </div>
 
