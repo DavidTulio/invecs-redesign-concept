@@ -78,7 +78,8 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
             <div className="p-5">
               {!sold && (
                 <p className="text-sm text-muted tabular-nums">
-                  Monthly estimate with {LOAN_DEFAULTS.downPaymentPct}% down over {LOAN_DEFAULTS.termMonths} months.
+                  Monthly estimate with {LOAN_DEFAULTS.downPaymentPct}% down over {LOAN_DEFAULTS.termMonths} months at a sample{" "}
+                  {LOAN_DEFAULTS.annualRatePct}% yearly add-on rate.
                   Estimate only.
                 </p>
               )}

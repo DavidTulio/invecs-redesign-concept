@@ -74,7 +74,8 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
       <CompareSync items={items} />
       <p className="mt-3 max-w-[65ch] text-muted">
         The lowest price, lowest mileage and newest year are marked in green. Monthly estimates assume{" "}
-        {LOAN_DEFAULTS.downPaymentPct}% down over {LOAN_DEFAULTS.termMonths} months; estimate only.
+        {LOAN_DEFAULTS.downPaymentPct}% down over {LOAN_DEFAULTS.termMonths} months at a sample {LOAN_DEFAULTS.annualRatePct}% yearly
+        add-on rate; estimate only.
       </p>
       {missing > 0 && (
         <p className="mt-3 rounded-field bg-soft p-3 text-sm">

@@ -15,7 +15,7 @@ export function LatestArrivals({ cars, total }: { cars: Car[]; total: number }) 
             </h2>
             <p className="mt-1 max-w-[60ch] text-sm text-muted">
               Monthly estimates assume {LOAN_DEFAULTS.downPaymentPct}% down over{" "}
-              {LOAN_DEFAULTS.termMonths} months at a sample {LOAN_DEFAULTS.annualRatePct}% yearly
+              {LOAN_DEFAULTS.termMonths} months at a sample {LOAN_DEFAULTS.annualRatePct}% yearly add-on
               rate. Estimate only; your bank sets the final terms.
             </p>
           </div>

@@ -4,7 +4,21 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { CalendarCheck } from "lucide-react";
 import { formatPeso } from "@/lib/format";
-import { calculateLoan, LOAN_DEFAULTS, LOAN_TERMS, loanInputSchema } from "@/lib/loan";
+import {
+  addOnRateForTerm,
+  calculateLoan,
+  LOAN_DEFAULTS,
+  LOAN_TERMS,
+  loanInputSchema,
+  RATE_TYPE_LABELS,
+  RATE_TYPES,
+  type RateType,
+} from "@/lib/loan";
+
+const RATE_TYPE_HINTS: Record<RateType, string> = {
+  addon: "Most PH banks",
+  diminishing: "Interest on what you still owe",
+};
 
 type CarContext = { slug: string; title: string };
 
@@ -13,12 +27,14 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
   const [priceText, setPriceText] = useState(String(initialPrice));
   const [downPaymentPct, setDownPaymentPct] = useState<number>(LOAN_DEFAULTS.downPaymentPct);
   const [termMonths, setTermMonths] = useState<number>(LOAN_DEFAULTS.termMonths);
+  const [rateType, setRateType] = useState<RateType>(LOAN_DEFAULTS.rateType);
   const [rateText, setRateText] = useState(String(LOAN_DEFAULTS.annualRatePct));
 
   const input = {
     price: Number(priceText),
     downPaymentPct,
     termMonths,
+    rateType,
     annualRatePct: Number(rateText),
   };
   const parsed = loanInputSchema.safeParse(input);
@@ -104,9 +120,36 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
           </div>
         </fieldset>
 
+        <fieldset className="grid gap-2">
+          <legend className="mb-1 text-sm font-semibold">How does the bank quote the rate?</legend>
+          <div className="grid grid-cols-2 gap-1.5">
+            {RATE_TYPES.map((type) => (
+              <label
+                key={type}
+                className="cursor-pointer rounded-field border border-line px-3 py-2.5 text-center text-sm font-semibold has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-signal"
+              >
+                <input
+                  type="radio"
+                  name="rate-type"
+                  value={type}
+                  checked={rateType === type}
+                  onChange={() => setRateType(type)}
+                  className="sr-only"
+                />
+                {RATE_TYPE_LABELS[type]}
+                <span className="block text-[11px] font-normal opacity-80">{RATE_TYPE_HINTS[type]}</span>
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-muted">
+            Not sure? Ask the bank whether its rate is add-on or diminishing. The same number costs more
+            as add-on.
+          </p>
+        </fieldset>
+
         <div className="grid gap-1.5">
           <label htmlFor={`${id}-rate`} className="text-sm font-semibold">
-            Interest rate per year
+            {RATE_TYPE_LABELS[rateType]} rate per year
           </label>
           <div className="relative w-40">
             <input
@@ -123,7 +166,10 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
             </span>
           </div>
           <p id={`${id}-rate-hint`} className={`text-xs ${rateError ? "font-medium text-signal" : "text-muted"}`}>
-            {rateError ?? "A sample rate. Your bank will quote its actual rate."}
+            {rateError ??
+              (rateType === "addon"
+                ? `Same as ${formatRate(addOnRateForTerm(Number(rateText), termMonths))}% for ${termMonths} months, the way bank rate sheets often list it. A sample rate; your bank quotes its own.`
+                : "A sample rate. Your bank will quote its actual rate.")}
           </p>
         </div>
       </form>
@@ -136,7 +182,9 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
           <p aria-live="polite" className="font-wider mt-2 text-[44px] leading-none font-extrabold tabular-nums">
             {loan ? formatPeso(Math.round(loan.monthly)) : "–"}
           </p>
-          <p className="mt-2 text-sm text-[#b9c2d0] tabular-nums">for {termMonths} months</p>
+          <p className="mt-2 text-sm text-[#b9c2d0] tabular-nums">
+            for {termMonths} months{loan && ` · ${formatRate(Number(rateText))}% ${rateType === "addon" ? "add-on" : "diminishing"} a year`}
+          </p>
 
           {loan && (
             <>
@@ -169,6 +217,11 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
       </section>
     </div>
   );
+}
+
+/** 36 → "36", 8.5 → "8.5", 2.6666 → "2.67" */
+function formatRate(value: number) {
+  return Number.isFinite(value) ? String(Math.round(value * 100) / 100) : "–";
 }
 
 /** Where the money goes: down payment, the loan itself, and interest. */
