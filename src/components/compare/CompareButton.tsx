@@ -9,11 +9,11 @@ import { useHydrated } from "@/lib/use-hydrated";
 export function CompareButton({
   slug,
   title,
-  variant = "card",
+  variant = "small",
 }: {
   slug: string;
   title: string;
-  variant?: "card" | "page";
+  variant?: "small" | "page";
 }) {
   const hydrated = useHydrated();
   const { list, toggle } = useCompare();
@@ -21,10 +21,8 @@ export function CompareButton({
   const full = !picked && list.length >= COMPARE_MAX;
 
   const look =
-    variant === "card"
-      ? `relative z-10 min-h-9 rounded-full px-3 text-[13px] shadow-[0_1px_3px_rgb(14_26_43/0.2)] ${
-          picked ? "bg-ink text-white" : "bg-paper/95 text-ink hover:bg-paper"
-        }`
+    variant === "small"
+      ? `min-h-10 rounded-field border px-3 text-sm ${picked ? "border-ink bg-ink text-white" : "border-line hover:border-ink"}`
       : `min-h-12 w-full justify-center rounded-field border px-4 ${
           picked ? "border-ink bg-ink text-white" : "border-line hover:border-ink"
         }`;

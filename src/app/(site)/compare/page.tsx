@@ -41,8 +41,8 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
         <CompareSync items={[]} />
         <p className="font-semibold">No cars picked yet.</p>
         <p className="mt-1 text-muted">
-          Tap <strong className="text-ink">Compare</strong> on any car to add it. You can compare up to{" "}
-          {COMPARE_MAX} cars side by side.
+          Save cars with the heart, then compare them from your Saved cars. Or open any car and tap{" "}
+          <strong className="text-ink">Compare</strong>. You can compare up to {COMPARE_MAX} cars side by side.
         </p>
         <Link
           href="/inventory"
@@ -89,8 +89,8 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
             Show only differences
           </label>
           {cars.length < COMPARE_MAX && (
-            <Link href="/inventory" className="inline-flex min-h-11 items-center gap-1 font-semibold text-signal hover:underline">
-              Add another car
+            <Link href="/saved" className="inline-flex min-h-11 items-center gap-1 font-semibold text-signal hover:underline">
+              Add from saved cars
               <ArrowRight aria-hidden size={16} />
             </Link>
           )}
