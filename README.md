@@ -54,7 +54,7 @@ Each layer was tested with real attack attempts (direct API calls, tampered requ
 ## Concept safeguards
 
 - A banner on every page says this is an unofficial concept and links to the official site.
-- Every page sends `noindex, nofollow` (meta tag and `X-Robots-Tag` header), and `robots.txt` disallows all crawlers.
+- Every page sends `noindex, nofollow` (meta tag and `X-Robots-Tag` header), and `robots.txt` disallows all crawlers except chat apps' link-preview robots (Messenger/Facebook, Viber, WhatsApp, Telegram). Those may read public pages, never `/admin`, so a shared car shows its photo, name and price; the preview itself says "redesign concept", and noindex keeps it out of search indexes.
 - The logo is a plain text wordmark; no logo or photos are copied from the dealer.
 - Inquiry forms run in demo mode and don't reach the dealer.
 
