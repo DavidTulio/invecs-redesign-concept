@@ -8,9 +8,11 @@ import {
   CONTACT_METHOD_LABELS,
   CONTACT_METHODS,
   fieldErrors,
+  formatTimeSlot,
   makeInquirySchema,
   MESSAGE_MAX,
   type ContactMethod,
+  TEST_DRIVE_TIMES,
   type InquiryField,
 } from "@/lib/inquiry";
 import { Field, describedBy, inputClass } from "./Field";
@@ -198,24 +200,44 @@ export function InquiryForm({
         </Field>
       </div>
 
-      <Field
-        id="preferred_date"
-        label="Preferred test-drive date"
-        required
-        hint="We'll confirm the exact time with you."
-        error={errors.preferred_date}
-      >
-        <input
-          {...describedBy("preferred_date", errors.preferred_date, "hint")}
-          name="preferred_date"
-          type="date"
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field id="preferred_date" label="Preferred test-drive date" required error={errors.preferred_date}>
+          <input
+            {...describedBy("preferred_date", errors.preferred_date)}
+            name="preferred_date"
+            type="date"
+            required
+            min={minDate}
+            max={maxDate}
+            defaultValue={values.preferred_date}
+            className={inputClass}
+          />
+        </Field>
+        <Field
+          id="preferred_time"
+          label="Preferred time"
           required
-          min={minDate}
-          max={maxDate}
-          defaultValue={values.preferred_date}
-          className={`${inputClass} sm:max-w-60`}
-        />
-      </Field>
+          hint="We'll confirm by your chosen contact method."
+          error={errors.preferred_time}
+        >
+          <select
+            {...describedBy("preferred_time", errors.preferred_time, "hint")}
+            name="preferred_time"
+            required
+            defaultValue={values.preferred_time ?? ""}
+            className={inputClass}
+          >
+            <option value="" disabled>
+              Choose a time
+            </option>
+            {TEST_DRIVE_TIMES.map((time) => (
+              <option key={time} value={time}>
+                {formatTimeSlot(time)}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
 
       <Field id="message" label="Message" error={errors.message}>
         <textarea

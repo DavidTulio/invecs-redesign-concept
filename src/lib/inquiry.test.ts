@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldErrors, makeInquirySchema, manilaDate, normalizePhilippineMobile } from "./inquiry";
+import { fieldErrors, formatTimeSlot, makeInquirySchema, manilaDate, normalizePhilippineMobile } from "./inquiry";
 
 // 16 Oct 2026, 11 PM in Manila (15:00 UTC). "Tomorrow" in Manila is 17 Oct.
 const NOW = new Date("2026-10-16T15:00:00Z");
@@ -12,6 +12,7 @@ const valid = {
   email: "",
   contact_method: "viber",
   preferred_date: "2026-10-20",
+  preferred_time: "10:00",
   message: "Is this still available?",
 };
 
@@ -52,6 +53,13 @@ describe("inquiry schema", () => {
 
   it("allows an inquiry with no specific car", () => {
     expect(schema.safeParse({ ...valid, car: "" }).success).toBe(true);
+  });
+
+  it("requires a test-drive time from the showroom slots", () => {
+    for (const preferred_time of ["", undefined, "08:00", "17:00", "10:30", "late"]) {
+      expect(errorsFor({ ...valid, preferred_time }).preferred_time).toBe("Choose a test-drive time");
+    }
+    expect(schema.parse({ ...valid, preferred_time: "16:00" }).preferred_time).toBe("16:00");
   });
 
   it("requires a test-drive date", () => {
@@ -105,5 +113,15 @@ describe("inquiry schema", () => {
     const result = schema.parse({ ...valid, status: "closed", created_at: "2099-01-01" });
     expect(result).not.toHaveProperty("status");
     expect(result).not.toHaveProperty("created_at");
+  });
+});
+
+describe("formatTimeSlot", () => {
+  it.each([
+    ["09:00", "9:00 AM"],
+    ["12:00", "12:00 PM"],
+    ["16:00", "4:00 PM"],
+  ])("shows %s as %s", (input, expected) => {
+    expect(formatTimeSlot(input)).toBe(expected);
   });
 });

@@ -16,6 +16,15 @@ export const CONTACT_METHOD_LABELS: Record<ContactMethod, string> = {
 export const MESSAGE_MAX = 1000;
 export const BOOKING_WINDOW_DAYS = 90;
 
+/** Test-drive start times: hourly within showroom hours (8 AM–6 PM), so every drive ends before closing. */
+export const TEST_DRIVE_TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"] as const;
+
+/** "13:00" → "1:00 PM" */
+export function formatTimeSlot(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  return `${hours % 12 || 12}:${String(minutes).padStart(2, "0")} ${hours < 12 ? "AM" : "PM"}`;
+}
+
 /** Today's date in the Philippines as YYYY-MM-DD, whatever the server's time zone. */
 export function manilaDate(date: Date, addDays = 0) {
   const shifted = new Date(date.getTime() + addDays * 86_400_000);
@@ -76,6 +85,7 @@ export function makeInquirySchema(now = new Date()) {
           .regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a test-drive date")
           .refine((d) => d >= firstDay && d <= lastDay, `Choose a date from tomorrow up to ${BOOKING_WINDOW_DAYS} days ahead`),
       ),
+      preferred_time: z.enum(TEST_DRIVE_TIMES, { error: "Choose a test-drive time" }),
       message: z
         .string()
         .trim()

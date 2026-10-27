@@ -17,7 +17,7 @@ export type InquiryState = {
   attempt?: number;
 };
 
-const FIELDS = ["car", "name", "phone", "email", "contact_method", "preferred_date", "message"] as const;
+const FIELDS = ["car", "name", "phone", "email", "contact_method", "preferred_date", "preferred_time", "message"] as const;
 
 const GENERIC_ERROR = "Something went wrong on our side. Please try again in a minute.";
 
@@ -102,6 +102,7 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
     email: inquiry.email ?? null,
     contact_method: inquiry.contact_method,
     preferred_date: inquiry.preferred_date,
+    preferred_time: inquiry.preferred_time,
     message: inquiry.message,
   });
   if (insertError) {

@@ -7,6 +7,7 @@ import { PageSkeleton } from "@/components/admin/PageSkeleton";
 import { formatDateTime, formatDay } from "@/lib/admin-format";
 import {
   CONTACT_METHOD_LABELS,
+  formatTimeSlot,
   INQUIRY_STATUS_LABELS,
   INQUIRY_STATUSES,
   type ContactMethod,
@@ -23,6 +24,7 @@ type Row = {
   email: string | null;
   contact_method: ContactMethod;
   preferred_date: string | null;
+  preferred_time: string | null;
   message: string;
   status: InquiryStatus;
   created_at: string;
@@ -56,7 +58,7 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
 
   const { data } = await supabase
     .from("inquiries")
-    .select("id, name, phone, email, contact_method, preferred_date, message, status, created_at, cars(slug, year, make, model, variant)")
+    .select("id, name, phone, email, contact_method, preferred_date, preferred_time, message, status, created_at, cars(slug, year, make, model, variant)")
     .order("created_at", { ascending: false });
   const all = (data ?? []) as unknown as Row[];
   const inquiries = filter ? all.filter((inquiry) => inquiry.status === filter) : all;
@@ -151,12 +153,13 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-muted">Preferred date</dt>
+                    <dt className="text-muted">Preferred date and time</dt>
                     <dd className="flex items-center gap-1.5 font-semibold">
                       {inquiry.preferred_date ? (
                         <>
                           <CalendarDays aria-hidden size={14} />
                           {formatDay(inquiry.preferred_date)}
+                          {inquiry.preferred_time && ` · ${formatTimeSlot(inquiry.preferred_time.slice(0, 5))}`}
                         </>
                       ) : (
                         "Not given"

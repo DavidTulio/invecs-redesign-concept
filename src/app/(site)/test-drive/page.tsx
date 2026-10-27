@@ -20,7 +20,7 @@ export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">
       <div className="min-w-0">
         <h1 className="font-wide text-3xl font-extrabold sm:text-4xl">Book a test drive</h1>
         <p className="mt-3 max-w-[60ch] text-[17px] leading-relaxed text-muted">
-          Pick a car and a date that suits you. We&apos;ll confirm by your chosen contact method.
+          Pick a car, a date and a time that suit you. We&apos;ll confirm by your chosen contact method.
           You can also use this form for questions about a car, trade-ins or financing.
         </p>
 
@@ -41,8 +41,8 @@ export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">
         </h2>
         <ol className="mt-4 grid gap-4 text-[15px]">
           {[
-            ["Send your request", "Choose a car, a date and how to reach you."],
-            ["We confirm", "The showroom replies by call, Viber, Messenger or email to set a time."],
+            ["Send your request", "Choose a car, a date and time, and how to reach you."],
+            ["We confirm", "The showroom replies by call, Viber, Messenger or email to confirm your slot."],
             ["Drive it", "Bring a valid driver's license. The test drive takes about 30 minutes."],
           ].map(([title, body], index) => (
             <li key={title} className="grid grid-cols-[2rem_1fr] gap-3">

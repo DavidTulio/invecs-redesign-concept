@@ -18,6 +18,11 @@ updates:
         patterns: ["@supabase/*"]
       minor-and-patch:
         update-types: ["minor", "patch"]
+    ignore:
+      # three must stay inside @google/model-viewer's supported range (0.183.x);
+      # update the two together by hand.
+      - dependency-name: "three"
+        update-types: ["version-update:semver-minor"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
