@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Calculator, CalendarCheck, Check, ChevronLeft } from "lucide-react";
 import { CarCard } from "@/components/cars/CarCard";
 import { Gallery } from "@/components/cars/Gallery";
+import { CompareButton } from "@/components/compare/CompareButton";
 import { PriceTag, TearLine } from "@/components/cars/PriceTag";
 import { StatusBadge } from "@/components/cars/StatusBadge";
 import { getAllCars, getCarBySlug } from "@/lib/data/cars";
@@ -107,6 +108,7 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
                     <Calculator aria-hidden size={18} />
                     Adjust the loan estimate
                   </Link>
+                  <CompareButton slug={car.slug} title={`${title} ${car.variant}`} variant="page" />
                 </div>
               )}
             </div>

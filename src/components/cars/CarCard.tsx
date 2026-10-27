@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatKm } from "@/lib/format";
 import { carTitle, FUEL_LABELS, TRANSMISSION_LABELS, type Car } from "@/lib/types";
+import { CompareButton } from "@/components/compare/CompareButton";
 import { CarImage } from "./CarImage";
 import { PriceTag, TearLine } from "./PriceTag";
 import { StatusBadge } from "./StatusBadge";
@@ -16,6 +17,9 @@ export function CarCard({ car, preload = false }: { car: Car; preload?: boolean 
         {car.status !== "available" && (
           <StatusBadge status={car.status} className="absolute top-3 left-3" />
         )}
+        <div className="absolute top-2.5 right-2.5">
+          <CompareButton slug={car.slug} title={`${carTitle(car)} ${car.variant}`} />
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-4">
