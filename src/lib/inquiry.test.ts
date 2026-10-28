@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldErrors, formatTimeSlot, makeInquirySchema, manilaDate, normalizePhilippineMobile } from "./inquiry";
+import { fieldErrors, formatTimeSlot, makeInquirySchema, manilaDate, normalizePhilippineMobile, tradeInOf } from "./inquiry";
 
 // 16 Oct 2026, 11 PM in Manila (15:00 UTC). "Tomorrow" in Manila is 17 Oct.
 const NOW = new Date("2026-10-16T15:00:00Z");
@@ -123,5 +123,46 @@ describe("formatTimeSlot", () => {
     ["16:00", "4:00 PM"],
   ])("shows %s as %s", (input, expected) => {
     expect(formatTimeSlot(input)).toBe(expected);
+  });
+});
+
+describe("trade-in", () => {
+  const withTradeIn = { ...valid, trade_in: "yes", trade_in_make: "Toyota", trade_in_model: "Vios", trade_in_year: "2016" };
+
+  it("is optional: no trade-in means nothing to save", () => {
+    expect(tradeInOf(schema.parse(valid))).toBeNull();
+  });
+
+  it("saves make, model and year, and reads mileage written with commas or km", () => {
+    const inquiry = schema.parse({ ...withTradeIn, trade_in_mileage: "85,000 km", trade_in_notes: "Casa-maintained" });
+    expect(tradeInOf(inquiry)).toEqual({ make: "Toyota", model: "Vios", year: 2016, mileageKm: 85_000, notes: "Casa-maintained" });
+  });
+
+  it("asks for make, model and year once the box is ticked", () => {
+    const errors = errorsFor({ ...valid, trade_in: "yes" });
+    expect(errors.trade_in_make).toMatch(/make/);
+    expect(errors.trade_in_model).toMatch(/model/);
+    expect(errors.trade_in_year).toMatch(/year/);
+  });
+
+  it("rejects impossible years, mileage and links in the notes", () => {
+    expect(errorsFor({ ...withTradeIn, trade_in_year: "1975" }).trade_in_year).toBeDefined();
+    expect(errorsFor({ ...withTradeIn, trade_in_year: "2030" }).trade_in_year).toBeDefined(); // NOW is 2026
+    expect(errorsFor({ ...withTradeIn, trade_in_mileage: "2000000" }).trade_in_mileage).toBeDefined();
+    expect(errorsFor({ ...withTradeIn, trade_in_mileage: "lots" }).trade_in_mileage).toBeDefined();
+    expect(errorsFor({ ...withTradeIn, trade_in_notes: "see www.example.com" }).trade_in_notes).toBeDefined();
+  });
+
+  it("ignores trade-in details when the box isn't ticked", () => {
+    expect(tradeInOf(schema.parse({ ...valid, trade_in_make: "Toyota", trade_in_model: "Vios", trade_in_year: "2016" }))).toBeNull();
+  });
+});
+
+describe("trade-in errors alongside other mistakes", () => {
+  it("shows missing trade-in details in the same round as a missing date", () => {
+    const errors = errorsFor({ ...valid, preferred_date: "", trade_in: "yes" });
+    expect(errors.preferred_date).toBeDefined();
+    expect(errors.trade_in_make).toMatch(/make/);
+    expect(errors.trade_in_year).toMatch(/year/);
   });
 });

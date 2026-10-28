@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import { CalendarDays, Mail, MessageCircle, Phone, Smartphone } from "lucide-react";
+import { CalendarDays, Mail, MessageCircle, Phone, Repeat, Smartphone } from "lucide-react";
 import { InquiryActions } from "@/components/admin/InquiryActions";
 import { PageSkeleton } from "@/components/admin/PageSkeleton";
 import { formatDateTime, formatDay } from "@/lib/admin-format";
+import { formatKm } from "@/lib/format";
 import {
   CONTACT_METHOD_LABELS,
   formatTimeSlot,
@@ -26,6 +27,11 @@ type Row = {
   preferred_date: string | null;
   preferred_time: string | null;
   message: string;
+  trade_in_make: string | null;
+  trade_in_model: string | null;
+  trade_in_year: number | null;
+  trade_in_mileage_km: number | null;
+  trade_in_notes: string | null;
   status: InquiryStatus;
   created_at: string;
   cars: { slug: string; year: number; make: string; model: string; variant: string } | null;
@@ -58,7 +64,7 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
 
   const { data } = await supabase
     .from("inquiries")
-    .select("id, name, phone, email, contact_method, preferred_date, preferred_time, message, status, created_at, cars(slug, year, make, model, variant)")
+    .select("id, name, phone, email, contact_method, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, status, created_at, cars(slug, year, make, model, variant)")
     .order("created_at", { ascending: false });
   const all = (data ?? []) as unknown as Row[];
   const inquiries = filter ? all.filter((inquiry) => inquiry.status === filter) : all;
@@ -167,6 +173,21 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
                     </dd>
                   </div>
                 </dl>
+
+                {inquiry.trade_in_make && (
+                  <div className="text-sm">
+                    <p className="flex flex-wrap items-center gap-1.5 font-semibold">
+                      <Repeat aria-hidden size={14} />
+                      Trade-in: {inquiry.trade_in_year} {inquiry.trade_in_make} {inquiry.trade_in_model}
+                      {inquiry.trade_in_mileage_km !== null && (
+                        <span className="font-normal text-muted tabular-nums">· {formatKm(inquiry.trade_in_mileage_km)}</span>
+                      )}
+                    </p>
+                    {inquiry.trade_in_notes && (
+                      <p className="mt-0.5 break-words text-muted whitespace-pre-wrap">{inquiry.trade_in_notes}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Shown as plain text: React escapes it, and links are not made clickable. */}
                 {inquiry.message && (

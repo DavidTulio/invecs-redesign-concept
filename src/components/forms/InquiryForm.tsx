@@ -13,6 +13,7 @@ import {
   MESSAGE_MAX,
   type ContactMethod,
   TEST_DRIVE_TIMES,
+  TRADE_IN_NOTES_MAX,
   type InquiryField,
 } from "@/lib/inquiry";
 import { Field, describedBy, inputClass } from "./Field";
@@ -49,6 +50,7 @@ export function InquiryForm({
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const [method, setMethod] = useState<ContactMethod>((values.contact_method as ContactMethod) || "call");
   const [messageLength, setMessageLength] = useState((values.message ?? "").length);
+  const [tradeIn, setTradeIn] = useState(values.trade_in === "yes");
 
   const errors = clientErrors ?? (state.status === "error" ? state.errors : undefined) ?? {};
   const serverMessage = state.status === "error" ? state.message : undefined;
@@ -247,13 +249,95 @@ export function InquiryForm({
           maxLength={MESSAGE_MAX}
           defaultValue={values.message}
           onChange={(event) => setMessageLength(event.target.value.length)}
-          placeholder="Questions about the car, trade-in, or financing"
+          placeholder="Questions about the car or financing"
           className={`${inputClass} resize-y`}
         />
         <p className="text-right text-xs text-muted tabular-nums">
           {messageLength} / {MESSAGE_MAX}
         </p>
       </Field>
+
+      {/* Optional trade-in: hidden until ticked, so the form stays short for everyone else. */}
+      <div className="grid gap-4">
+        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5 font-semibold">
+          <input
+            type="checkbox"
+            name="trade_in"
+            value="yes"
+            checked={tradeIn}
+            onChange={(event) => setTradeIn(event.target.checked)}
+            aria-controls={tradeIn ? "trade-in-details" : undefined}
+            className="size-5 accent-[var(--color-ink)]"
+          />
+          I have a car to trade in
+        </label>
+
+        {tradeIn && (
+          <fieldset id="trade-in-details" className="grid gap-4 rounded-card border border-line bg-soft p-4">
+            <legend className="sr-only">Your trade-in car</legend>
+            <p className="text-sm text-muted">We&apos;ll give you an estimate after we see the car in person.</p>
+            <div className="grid gap-4 sm:grid-cols-[1fr_1fr_8rem]">
+              <Field id="trade_in_make" label="Make" required error={errors.trade_in_make}>
+                <input
+                  {...describedBy("trade_in_make", errors.trade_in_make)}
+                  name="trade_in_make"
+                  maxLength={40}
+                  autoComplete="off"
+                  placeholder="Toyota"
+                  defaultValue={values.trade_in_make}
+                  className={inputClass}
+                />
+              </Field>
+              <Field id="trade_in_model" label="Model" required error={errors.trade_in_model}>
+                <input
+                  {...describedBy("trade_in_model", errors.trade_in_model)}
+                  name="trade_in_model"
+                  maxLength={60}
+                  autoComplete="off"
+                  placeholder="Vios"
+                  defaultValue={values.trade_in_model}
+                  className={inputClass}
+                />
+              </Field>
+              <Field id="trade_in_year" label="Year" required error={errors.trade_in_year}>
+                <input
+                  {...describedBy("trade_in_year", errors.trade_in_year)}
+                  name="trade_in_year"
+                  inputMode="numeric"
+                  maxLength={4}
+                  autoComplete="off"
+                  placeholder="2016"
+                  defaultValue={values.trade_in_year}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <Field id="trade_in_mileage" label="Mileage (km)" error={errors.trade_in_mileage}>
+              <input
+                {...describedBy("trade_in_mileage", errors.trade_in_mileage)}
+                name="trade_in_mileage"
+                inputMode="numeric"
+                maxLength={12}
+                autoComplete="off"
+                placeholder="85,000"
+                defaultValue={values.trade_in_mileage}
+                className={`${inputClass} sm:max-w-60`}
+              />
+            </Field>
+            <Field id="trade_in_notes" label="Condition notes" error={errors.trade_in_notes}>
+              <textarea
+                {...describedBy("trade_in_notes", errors.trade_in_notes)}
+                name="trade_in_notes"
+                rows={2}
+                maxLength={TRADE_IN_NOTES_MAX}
+                placeholder="Casa-maintained, minor scratches, new tires…"
+                defaultValue={values.trade_in_notes}
+                className={`${inputClass} resize-y`}
+              />
+            </Field>
+          </fieldset>
+        )}
+      </div>
 
       {/* Honeypot: hidden from people and screen readers; bots tend to fill every field. */}
       <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">

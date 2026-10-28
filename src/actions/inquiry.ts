@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { getAllCars } from "@/lib/data/cars";
-import { fieldErrors, makeInquirySchema, type InquiryField } from "@/lib/inquiry";
+import { fieldErrors, makeInquirySchema, tradeInOf, type InquiryField } from "@/lib/inquiry";
 import { checkFormStamp, clientIp, hashIp } from "@/lib/server/form-guard";
 import { verifyTurnstile } from "@/lib/server/turnstile";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,7 +17,22 @@ export type InquiryState = {
   attempt?: number;
 };
 
-const FIELDS = ["car", "name", "phone", "email", "contact_method", "preferred_date", "preferred_time", "message"] as const;
+const FIELDS = [
+  "car",
+  "name",
+  "phone",
+  "email",
+  "contact_method",
+  "preferred_date",
+  "preferred_time",
+  "message",
+  "trade_in",
+  "trade_in_make",
+  "trade_in_model",
+  "trade_in_year",
+  "trade_in_mileage",
+  "trade_in_notes",
+] as const;
 
 const GENERIC_ERROR = "Something went wrong on our side. Please try again in a minute.";
 
@@ -57,6 +72,7 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
     return fail("Please check the highlighted fields.", fieldErrors(parsed.error));
   }
   const inquiry = parsed.data;
+  const tradeIn = tradeInOf(inquiry);
 
   const requestHeaders = await headers();
   const ip = clientIp(requestHeaders);
@@ -104,6 +120,12 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
     preferred_date: inquiry.preferred_date,
     preferred_time: inquiry.preferred_time,
     message: inquiry.message,
+    // Saved only when "I have a car to trade in" was ticked.
+    trade_in_make: tradeIn?.make ?? null,
+    trade_in_model: tradeIn?.model ?? null,
+    trade_in_year: tradeIn?.year ?? null,
+    trade_in_mileage_km: tradeIn?.mileageKm ?? null,
+    trade_in_notes: tradeIn?.notes ?? null,
   });
   if (insertError) {
     console.error("Saving inquiry failed:", insertError.message);

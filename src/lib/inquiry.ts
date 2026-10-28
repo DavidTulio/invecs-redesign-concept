@@ -16,6 +16,11 @@ export const CONTACT_METHOD_LABELS: Record<ContactMethod, string> = {
 export const MESSAGE_MAX = 1000;
 export const BOOKING_WINDOW_DAYS = 90;
 
+/** Optional trade-in: the car the buyer wants to hand in as part of the payment. */
+export const TRADE_IN_OLDEST_YEAR = 1980;
+export const TRADE_IN_MAX_KM = 1_000_000;
+export const TRADE_IN_NOTES_MAX = 300;
+
 /** Test-drive start times: hourly within showroom hours (8 AM–6 PM), so every drive ends before closing. */
 export const TEST_DRIVE_TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"] as const;
 
@@ -43,9 +48,26 @@ const countLinks = (text: string) => (text.match(/https?:\/\/|www\./gi) ?? []).l
 const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
+/** "85,000 km" → "85000", so people can type numbers the way they write them. */
+const plainNumber = (value: unknown) =>
+  emptyToUndefined(typeof value === "string" ? value.replace(/[\s,]|km/gi, "") : value);
+
+/** The trade-in car, or null when the buyer didn't tick "I have a car to trade in". */
+export function tradeInOf(inquiry: InquiryInput) {
+  if (!inquiry.trade_in || !inquiry.trade_in_make || !inquiry.trade_in_model || !inquiry.trade_in_year) return null;
+  return {
+    make: inquiry.trade_in_make,
+    model: inquiry.trade_in_model,
+    year: inquiry.trade_in_year,
+    mileageKm: inquiry.trade_in_mileage ?? null,
+    notes: inquiry.trade_in_notes ?? null,
+  };
+}
+
 export function makeInquirySchema(now = new Date()) {
   const firstDay = manilaDate(now, 1); // test drives start tomorrow at the earliest
   const lastDay = manilaDate(now, BOOKING_WINDOW_DAYS);
+  const newestTradeInYear = Number(manilaDate(now).slice(0, 4)) + 1;
 
   return z
     .object({
@@ -92,8 +114,39 @@ export function makeInquirySchema(now = new Date()) {
         .max(MESSAGE_MAX, `Keep your message under ${MESSAGE_MAX} characters`)
         .refine((text) => countLinks(text) <= 2, "Please remove the links from your message")
         .default(""),
+      trade_in: z.preprocess((value) => value === "yes", z.boolean()),
+      trade_in_make: z.preprocess(emptyToUndefined, z.string().trim().max(40, "Keep the make under 40 characters").optional()),
+      trade_in_model: z.preprocess(emptyToUndefined, z.string().trim().max(60, "Keep the model under 60 characters").optional()),
+      trade_in_year: z.preprocess(
+        plainNumber,
+        z.coerce
+          .number({ error: "Enter the year, like 2016" })
+          .int("Enter the year, like 2016")
+          .min(TRADE_IN_OLDEST_YEAR, `Enter a year from ${TRADE_IN_OLDEST_YEAR} to ${newestTradeInYear}`)
+          .max(newestTradeInYear, `Enter a year from ${TRADE_IN_OLDEST_YEAR} to ${newestTradeInYear}`)
+          .optional(),
+      ),
+      trade_in_mileage: z.preprocess(
+        plainNumber,
+        z.coerce
+          .number({ error: "Enter the mileage in km, like 85000" })
+          .int("Enter the mileage in km, like 85000")
+          .min(0, "Enter the mileage in km, like 85000")
+          .max(TRADE_IN_MAX_KM, "Enter the mileage in km, up to 1,000,000")
+          .optional(),
+      ),
+      trade_in_notes: z.preprocess(
+        emptyToUndefined,
+        z
+          .string()
+          .trim()
+          .max(TRADE_IN_NOTES_MAX, `Keep the notes under ${TRADE_IN_NOTES_MAX} characters`)
+          .refine((text) => countLinks(text) === 0, "Please remove the links from the notes")
+          .optional(),
+      ),
     })
     .superRefine((data, ctx) => {
+      // The trade-in fields only count when the box is ticked; then make, model and year are needed.
       // Ask for the detail that matches the chosen contact method.
       if ((data.contact_method === "call" || data.contact_method === "viber") && !data.phone) {
         ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter your mobile number so we can reach you" });
@@ -104,7 +157,17 @@ export function makeInquirySchema(now = new Date()) {
       if (data.contact_method === "messenger" && !data.phone && !data.email) {
         ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter a mobile number or email so we can find you" });
       }
-    });
+    })
+    .superRefine(
+      (data, ctx) => {
+        if (!data.trade_in) return;
+        if (!data.trade_in_make) ctx.addIssue({ code: "custom", path: ["trade_in_make"], message: "Enter the make, like Toyota" });
+        if (!data.trade_in_model) ctx.addIssue({ code: "custom", path: ["trade_in_model"], message: "Enter the model, like Vios" });
+        if (!data.trade_in_year) ctx.addIssue({ code: "custom", path: ["trade_in_year"], message: "Enter the year, like 2016" });
+      },
+      // Runs even while other fields have mistakes, so every missing trade-in detail shows in one go.
+      { when: (payload) => payload.issues.every((issue) => !String(issue.path?.[0] ?? "").startsWith("trade_in")) },
+    );
 }
 
 export type InquiryInput = z.infer<ReturnType<typeof makeInquirySchema>>;
