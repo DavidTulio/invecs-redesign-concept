@@ -166,3 +166,15 @@ describe("trade-in errors alongside other mistakes", () => {
     expect(errors.trade_in_year).toMatch(/year/);
   });
 });
+
+describe("contact details alongside other mistakes", () => {
+  it("asks for the phone number in the same round as a missing date", () => {
+    const errors = errorsFor({ ...valid, phone: "", preferred_date: "" });
+    expect(errors.preferred_date).toBeDefined();
+    expect(errors.phone).toMatch(/mobile number/);
+  });
+
+  it("doesn't ask for a phone number twice when the one given is invalid", () => {
+    expect(errorsFor({ ...valid, phone: "12345", preferred_date: "" }).phone).toMatch(/PH mobile/);
+  });
+});

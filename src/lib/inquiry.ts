@@ -145,29 +145,40 @@ export function makeInquirySchema(now = new Date()) {
           .optional(),
       ),
     })
-    .superRefine((data, ctx) => {
-      // The trade-in fields only count when the box is ticked; then make, model and year are needed.
-      // Ask for the detail that matches the chosen contact method.
-      if ((data.contact_method === "call" || data.contact_method === "viber") && !data.phone) {
-        ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter your mobile number so we can reach you" });
-      }
-      if (data.contact_method === "email" && !data.email) {
-        ctx.addIssue({ code: "custom", path: ["email"], message: "Enter your email address" });
-      }
-      if (data.contact_method === "messenger" && !data.phone && !data.email) {
-        ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter a mobile number or email so we can find you" });
-      }
-    })
+    // These checks compare fields with each other. By default Zod skips them while any field
+    // has a mistake; `when` runs them as long as their own fields are valid, so the visitor
+    // sees every problem in one round instead of fixing the form twice.
     .superRefine(
       (data, ctx) => {
+        // Ask for the detail that matches the chosen contact method.
+        if ((data.contact_method === "call" || data.contact_method === "viber") && !data.phone) {
+          ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter your mobile number so we can reach you" });
+        }
+        if (data.contact_method === "email" && !data.email) {
+          ctx.addIssue({ code: "custom", path: ["email"], message: "Enter your email address" });
+        }
+        if (data.contact_method === "messenger" && !data.phone && !data.email) {
+          ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter a mobile number or email so we can find you" });
+        }
+      },
+      { when: fieldsValid((field) => ["contact_method", "phone", "email"].includes(field)) },
+    )
+    .superRefine(
+      (data, ctx) => {
+        // The trade-in fields only count when the box is ticked; then make, model and year are needed.
         if (!data.trade_in) return;
         if (!data.trade_in_make) ctx.addIssue({ code: "custom", path: ["trade_in_make"], message: "Enter the make, like Toyota" });
         if (!data.trade_in_model) ctx.addIssue({ code: "custom", path: ["trade_in_model"], message: "Enter the model, like Vios" });
         if (!data.trade_in_year) ctx.addIssue({ code: "custom", path: ["trade_in_year"], message: "Enter the year, like 2016" });
       },
-      // Runs even while other fields have mistakes, so every missing trade-in detail shows in one go.
-      { when: (payload) => payload.issues.every((issue) => !String(issue.path?.[0] ?? "").startsWith("trade_in")) },
+      { when: fieldsValid((field) => field.startsWith("trade_in")) },
     );
+}
+
+/** For `superRefine({ when })`: true while none of the matching fields has a mistake yet. */
+function fieldsValid(matches: (field: string) => boolean) {
+  return (payload: { issues: { path?: PropertyKey[] }[] }) =>
+    payload.issues.every((issue) => !matches(String(issue.path?.[0] ?? "")));
 }
 
 export type InquiryInput = z.infer<ReturnType<typeof makeInquirySchema>>;
