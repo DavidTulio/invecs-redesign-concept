@@ -23,6 +23,13 @@ updates:
       # update the two together by hand.
       - dependency-name: "three"
         update-types: ["version-update:semver-minor"]
+      # Node's type descriptions must match the Node.js version the site runs on (24.x,
+      # in CI and on Vercel). Move to a new major together with the runtime.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # TypeScript 7 is a full rewrite; upgrade deliberately once Next.js supports it.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
