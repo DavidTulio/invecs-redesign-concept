@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters } from "./filters";
+import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchSuggestions, searchWords } from "./filters";
 import type { Car } from "./types";
 
 let id = 0;
@@ -102,5 +102,55 @@ describe("activeFilters", () => {
 
   it("builds clean URLs", () => {
     expect(inventoryHref(parseFilters({ body: "suv", sort: "newest" }))).toBe("/inventory?body=suv");
+  });
+});
+
+describe("text search", () => {
+  const stock = [
+    car({ make: "Toyota", model: "Fortuner", variant: "2.8 V 4x4", body_type: "suv", fuel: "diesel", year: 2021, features: ["7 seats", "Reverse camera"] }),
+    car({ make: "Toyota", model: "Vios", variant: "1.3 XLE", body_type: "sedan", fuel: "gasoline", year: 2017, color: "Red", features: ["Leather seats"] }),
+    car({ make: "Ford", model: "Ranger", variant: "Raptor 2.0", body_type: "pickup", fuel: "diesel", year: 2021 }),
+  ];
+  const search = (q: string, extra: Record<string, string> = {}) =>
+    applyFilters(stock, parseFilters({ q, ...extra })).map((c) => c.model);
+
+  it("matches every word in any order, ignoring case", () => {
+    expect(search("fortuner diesel")).toEqual(["Fortuner"]);
+    expect(search("DIESEL Fortuner")).toEqual(["Fortuner"]);
+  });
+
+  it("searches the year, colour, variant and features", () => {
+    expect(search("2021").sort()).toEqual(["Fortuner", "Ranger"]);
+    expect(search("red")).toEqual(["Vios"]);
+    expect(search("raptor")).toEqual(["Ranger"]);
+    expect(search("reverse camera")).toEqual(["Fortuner"]);
+  });
+
+  it("understands '7-seater' as '7 seats'", () => {
+    expect(searchWords("7-Seater, 4X4!")).toEqual(["7seat", "4x4"]);
+    expect(search("7 seater")).toEqual(["Fortuner"]);
+    expect(search("7-seaters")).toEqual(["Fortuner"]);
+  });
+
+  it("works together with the other filters", () => {
+    expect(search("diesel", { body: "pickup" })).toEqual(["Ranger"]);
+  });
+
+  it("finds nothing for unrelated words, and ignores blank searches", () => {
+    expect(search("lamborghini")).toEqual([]);
+    expect(parseFilters({ q: "   " }).q).toBeUndefined();
+  });
+
+  it("shows the search as a removable chip", () => {
+    const chip = activeFilters(parseFilters({ q: "fortuner", body: "suv" })).find((c) => c.key === "q");
+    expect(chip?.label).toBe('"fortuner"');
+    expect(chip?.href).toBe("/inventory?body=suv");
+  });
+
+  it("suggests cars matching some of the words when nothing matches all of them", () => {
+    const filters = parseFilters({ q: "fortuner lamborghini" });
+    expect(applyFilters(stock, filters)).toEqual([]);
+    expect(searchSuggestions(stock, filters).map((c) => c.model)).toEqual(["Fortuner"]);
+    expect(searchSuggestions(stock, parseFilters({ q: "zzz" }))).toHaveLength(3);
   });
 });

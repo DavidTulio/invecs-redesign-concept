@@ -12,7 +12,7 @@ import {
 } from "./types";
 
 // ---------------------------------------------------------------------------
-// Inventory filters live in the URL (?body=pickup&make=Ford&max=1000000).
+// Inventory filters live in the URL (?q=fortuner&body=pickup&make=Ford&max=1000000).
 // This file turns the URL into clean filters, applies them, and works out
 // which options to offer next. Options with 0 cars are never offered.
 // ---------------------------------------------------------------------------
@@ -36,6 +36,7 @@ export const YEAR_STEPS = [2023, 2021, 2019, 2017, 2015, 2010];
 const optional = <T extends z.ZodType>(schema: T) => schema.optional().catch(undefined);
 
 const filtersSchema = z.object({
+  q: optional(z.string().trim().min(1).max(80)),
   body: optional(z.enum(BODY_TYPES)),
   make: optional(z.string().trim().min(1).max(40)),
   model: optional(z.string().trim().min(1).max(60)),
@@ -83,10 +84,65 @@ export function inventoryHref(filters: Filters) {
 }
 
 // ---------------------------------------------------------------------------
+// Text search: every word must appear somewhere in the car's details, in any
+// order, ignoring case ("diesel fortuner" = "Fortuner Diesel"). No typo guessing,
+// so results stay predictable.
+// ---------------------------------------------------------------------------
+
+/** Seat counts are one word on both sides, so "7 seater" matches "7 seats" but not "2017" + "Leather seats". */
+const joinSeats = (text: string) => text.replace(/(\d+)\s*-?\s*seat(er|ers|s)?\b/g, "$1seat");
+
+/** "7-Seater, 4X4!" → ["7seat", "4x4"] */
+export function searchWords(query: string) {
+  return joinSeats(query.toLowerCase())
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter(Boolean);
+}
+
+function searchableText(car: Car) {
+  const text = [
+    car.make,
+    car.model,
+    car.variant,
+    car.year,
+    car.color,
+    FUEL_LABELS[car.fuel],
+    TRANSMISSION_LABELS[car.transmission],
+    BODY_TYPE_LABELS[car.body_type],
+    ...car.features,
+  ]
+    .join(" ")
+    .toLowerCase();
+  return joinSeats(text);
+}
+
+export function matchesSearch(car: Car, query: string) {
+  const text = searchableText(car);
+  return searchWords(query).every((word) => text.includes(word));
+}
+
+/**
+ * When a search finds nothing: up to `limit` cars that match at least one of the
+ * words (most words first), or else the newest cars, so the visitor is never stuck.
+ */
+export function searchSuggestions(cars: Car[], filters: Filters, limit = 3) {
+  const words = filters.q ? searchWords(filters.q) : [];
+  const pool = matching(inStock(cars), filters, ["q"]);
+  const scored = pool
+    .map((car) => ({ car, hits: words.filter((word) => searchableText(car).includes(word)).length }))
+    .filter(({ hits }) => hits > 0)
+    .sort((a, b) => b.hits - a.hits || b.car.created_at.localeCompare(a.car.created_at))
+    .map(({ car }) => car);
+  return (scored.length ? scored : pool.sort(sorters.newest)).slice(0, limit);
+}
+
+// ---------------------------------------------------------------------------
 // Matching and sorting
 // ---------------------------------------------------------------------------
 
 const tests: Record<FilterKey, (car: Car, f: Filters) => boolean> = {
+  q: (car, f) => !f.q || matchesSearch(car, f.q),
   body: (car, f) => !f.body || car.body_type === f.body,
   make: (car, f) => !f.make || car.make === f.make,
   model: (car, f) => !f.model || car.model === f.model,
@@ -195,6 +251,7 @@ export type ActiveFilter = { key: FilterKey; label: string; href: string };
 
 export function activeFilters(filters: Filters): ActiveFilter[] {
   const labels: Partial<Record<FilterKey, string>> = {
+    q: filters.q ? `"${filters.q}"` : undefined,
     body: filters.body && BODY_TYPE_LABELS[filters.body],
     make: filters.make,
     model: filters.model,
