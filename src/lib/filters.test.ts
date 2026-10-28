@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchLabel, searchSuggestions, searchWords } from "./filters";
+import {
+  activeFilters,
+  applyFilters,
+  getFacets,
+  inventoryHref,
+  parseFilters,
+  parseShow,
+  searchLabel,
+  searchSuggestions,
+  searchWords,
+  showMoreHref,
+} from "./filters";
 import type { Car } from "./types";
 
 let id = 0;
@@ -161,5 +172,26 @@ describe("searchLabel", () => {
     const long = "Call 0917 123 4567 now for a 50% discount on every car";
     expect(searchLabel(long)).toBe("Call 0917 123 4567 now for a 50% discoun…");
     expect(activeFilters(parseFilters({ q: long }))[0].label).toBe('"Call 0917 123 4567 now for a 50% discoun…"');
+  });
+});
+
+describe("paging", () => {
+  it("starts at 12 and only accepts whole pages", () => {
+    expect(parseShow({})).toBe(12);
+    expect(parseShow({ show: "24" })).toBe(24);
+    expect(parseShow({ show: "30" })).toBe(36); // rounded up to a whole page
+  });
+
+  it("ignores odd values in a link", () => {
+    for (const show of ["0", "-24", "abc", "12.5", "", "5"]) expect(parseShow({ show })).toBe(12);
+    expect(parseShow({ show: "999999" })).toBe(1200);
+  });
+
+  it("keeps the filters when showing more, and drops ?show= when a filter changes", () => {
+    const filters = parseFilters({ body: "suv", sort: "price-asc" });
+    expect(showMoreHref(filters, 12)).toBe("/inventory?body=suv&sort=price-asc&show=24");
+    expect(showMoreHref(parseFilters({}), 24)).toBe("/inventory?show=36");
+    expect(inventoryHref({ ...filters, body: "pickup" })).not.toContain("show=");
+    expect(activeFilters(filters)[0].href).not.toContain("show=");
   });
 });

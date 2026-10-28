@@ -8,7 +8,18 @@ import { FilterPanel } from "@/components/inventory/FilterPanel";
 import { SearchBox } from "@/components/inventory/SearchBox";
 import { SortSelect } from "@/components/inventory/SortSelect";
 import { getAllCars } from "@/lib/data/cars";
-import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchLabel, searchSuggestions } from "@/lib/filters";
+import {
+  activeFilters,
+  applyFilters,
+  getFacets,
+  inventoryHref,
+  parseFilters,
+  PAGE_SIZE,
+  parseShow,
+  searchLabel,
+  searchSuggestions,
+  showMoreHref,
+} from "@/lib/filters";
 
 export const metadata: Metadata = {
   title: "Cars for sale",
@@ -28,7 +39,9 @@ export default function InventoryPage({ searchParams }: PageProps<"/inventory">)
 }
 
 async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, "searchParams">) {
-  const filters = parseFilters(await searchParams);
+  const params = await searchParams;
+  const filters = parseFilters(params);
+  const show = parseShow(params);
   const cars = await getAllCars();
   const results = applyFilters(cars, filters);
   const facets = getFacets(cars, filters);
@@ -74,13 +87,33 @@ async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, 
 
           <ResultsRegion>
             {results.length > 0 ? (
-              <ul className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {results.map((car, index) => (
-                  <li key={car.id} className="flex">
-                    <CarCard car={car} preload={index < 2} />
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {results.slice(0, show).map((car, index) => (
+                    <li key={car.id} className="flex">
+                      <CarCard car={car} preload={index < 2} />
+                    </li>
+                  ))}
+                </ul>
+                {/* 12 at a time keeps the page light on mobile data. A plain link, so it works
+                    before scripts load, and the back button returns to the same spot. */}
+                {results.length > PAGE_SIZE && (
+                  <div className="mt-8 grid justify-items-center gap-3 text-center">
+                    <p className="text-sm text-muted tabular-nums">
+                      Showing {Math.min(show, results.length)} of {results.length} cars
+                    </p>
+                    {show < results.length && (
+                      <Link
+                        href={showMoreHref(filters, show)}
+                        scroll={false}
+                        className="inline-flex min-h-12 items-center rounded-field border border-ink px-6 font-semibold hover:bg-ink hover:text-white"
+                      >
+                        Show more cars
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </>
             ) : filters.q ? (
               <>
                 <div className="mt-5 rounded-card border border-dashed border-line p-8 text-center">

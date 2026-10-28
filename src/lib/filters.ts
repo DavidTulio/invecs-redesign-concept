@@ -84,6 +84,26 @@ export function inventoryHref(filters: Filters) {
 }
 
 // ---------------------------------------------------------------------------
+// Paging: 12 cars at a time, "Show more cars" adds the next 12 (?show=24).
+// It isn't a filter, so every filter, sort or search change starts again at 12.
+// ---------------------------------------------------------------------------
+
+export const PAGE_SIZE = 12;
+const MAX_SHOWN = 1_200;
+
+/** ?show= from the URL as a whole number of pages; anything odd falls back to the first page. */
+export function parseShow(raw: RawParams) {
+  const value = Number(Array.isArray(raw.show) ? raw.show[0] : raw.show);
+  if (!Number.isInteger(value) || value <= PAGE_SIZE) return PAGE_SIZE;
+  return Math.min(Math.ceil(value / PAGE_SIZE) * PAGE_SIZE, MAX_SHOWN);
+}
+
+export function showMoreHref(filters: Filters, shown: number) {
+  const href = inventoryHref(filters);
+  return `${href}${href.includes("?") ? "&" : "?"}show=${shown + PAGE_SIZE}`;
+}
+
+// ---------------------------------------------------------------------------
 // Text search: every word must appear somewhere in the car's details, in any
 // order, ignoring case ("diesel fortuner" = "Fortuner Diesel"). No typo guessing,
 // so results stay predictable.

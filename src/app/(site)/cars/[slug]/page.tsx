@@ -16,9 +16,13 @@ import { carPhotoUrl } from "@/lib/supabase/public";
 import { LOAN_DEFAULTS } from "@/lib/loan";
 import { BODY_TYPE_LABELS, carTitle, FUEL_LABELS, TRANSMISSION_LABELS } from "@/lib/types";
 
+// Pre-build only the newest cars, so deploys stay fast as the stock grows. Older car
+// pages are built on their first visit and cached, so visitors see no difference.
+const PREBUILT_CARS = 60;
+
 export async function generateStaticParams() {
-  const cars = await getAllCars();
-  return cars.map((car) => ({ slug: car.slug }));
+  const cars = await getAllCars(); // newest first
+  return cars.slice(0, PREBUILT_CARS).map((car) => ({ slug: car.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/cars/[slug]">): Promise<Metadata> {

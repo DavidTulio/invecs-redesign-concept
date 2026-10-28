@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight, TrendingDown, TrendingUp, X } from "lucide-react";
+import { getSavedCars } from "@/actions/cars";
 import { CarCard } from "@/components/cars/CarCard";
 import { CompareButton } from "@/components/compare/CompareButton";
 import { COMPARE_MAX, compareHref } from "@/lib/compare";
@@ -11,12 +13,61 @@ import { useFavourites } from "@/lib/use-favourites";
 import { useHydrated } from "@/lib/use-hydrated";
 import type { Car } from "@/lib/types";
 
-/** The visitor's favourites, read from this browser and matched to the current stock. */
-export function SavedCars({ cars }: { cars: Car[] }) {
+type Fetched = { cars: Map<string, Car>; asked: Set<string> };
+
+/**
+ * The visitor's favourites, read from this browser. Only the saved cars are fetched
+ * (never the whole stock), and each car only once, so removing a heart is instant.
+ */
+export function SavedCars() {
   const hydrated = useHydrated();
   const { list, remove, clear } = useFavourites();
+  const [fetched, setFetched] = useState<Fetched>({ cars: new Map(), asked: new Set() });
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  const missing = list.map((item) => item.slug).filter((slug) => !fetched.asked.has(slug));
+  const missingKey = missing.join(",");
+
+  useEffect(() => {
+    if (!missingKey) return;
+    const slugs = missingKey.split(",");
+    let current = true;
+    getSavedCars(slugs).then(
+      (cars) => {
+        if (!current) return;
+        setFailed(false);
+        setFetched((previous) => ({
+          cars: new Map([...previous.cars, ...cars.map((car) => [car.slug, car] as const)]),
+          asked: new Set([...previous.asked, ...slugs]),
+        }));
+      },
+      () => current && setFailed(true),
+    );
+    return () => {
+      current = false;
+    };
+  }, [missingKey, attempt]);
 
   if (!hydrated) return <p className="mt-6 text-muted">Loading your saved cars…</p>;
+
+  if (failed && missing.length > 0) {
+    return (
+      <div role="alert" className="mt-6 max-w-xl rounded-card border border-line p-6">
+        <p className="font-semibold">We couldn&apos;t load your saved cars.</p>
+        <p className="mt-1 text-muted">Check your connection, then try again. Your saved list is still on this device.</p>
+        <button
+          type="button"
+          onClick={() => setAttempt((n) => n + 1)}
+          className="mt-5 inline-flex min-h-11 items-center rounded-field bg-ink px-4 font-semibold text-white hover:bg-ink-2"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  if (missing.length > 0) return <p className="mt-6 text-muted">Loading your saved cars…</p>;
 
   if (list.length === 0) {
     return (
@@ -37,7 +88,7 @@ export function SavedCars({ cars }: { cars: Car[] }) {
     );
   }
 
-  const bySlug = new Map(cars.map((car) => [car.slug, car]));
+  const bySlug = fetched.cars;
   const gone = list.filter((item) => !bySlug.has(item.slug));
   const listed = list.filter((item) => bySlug.has(item.slug));
   // Two or three saved cars: compare them in one tap. More: pick them below each car.
