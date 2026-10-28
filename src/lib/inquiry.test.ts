@@ -178,3 +178,17 @@ describe("contact details alongside other mistakes", () => {
     expect(errorsFor({ ...valid, phone: "12345", preferred_date: "" }).phone).toMatch(/PH mobile/);
   });
 });
+
+describe("no web links in short fields", () => {
+  it("refuses links in the name and the trade-in make and model", () => {
+    expect(errorsFor({ ...valid, name: "Visit www.spam.com" }).name).toMatch(/without web links/);
+    expect(errorsFor({ ...valid, name: "https://spam.example" }).name).toBeDefined();
+    const tradeIn = { ...valid, trade_in: "yes", trade_in_make: "Toyota", trade_in_model: "Vios", trade_in_year: "2016" };
+    expect(errorsFor({ ...tradeIn, trade_in_make: "www.spam.com" }).trade_in_make).toMatch(/without web links/);
+    expect(errorsFor({ ...tradeIn, trade_in_model: "http://spam.example" }).trade_in_model).toMatch(/without web links/);
+  });
+
+  it("still accepts ordinary names with dots", () => {
+    expect(schema.safeParse({ ...valid, name: "Ma. Cristina R. Santos" }).success).toBe(true);
+  });
+});

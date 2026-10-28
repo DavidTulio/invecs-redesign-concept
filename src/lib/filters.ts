@@ -117,6 +117,14 @@ function searchableText(car: Car) {
   return joinSeats(text);
 }
 
+/**
+ * The search as shown back on the page, cut to 40 characters. Anyone can put text in a
+ * link (?q=…), so a long made-up "message" can't be displayed in full on our page.
+ */
+export function searchLabel(query: string) {
+  return query.length > 40 ? `${query.slice(0, 40).trimEnd()}…` : query;
+}
+
 export function matchesSearch(car: Car, query: string) {
   const text = searchableText(car);
   return searchWords(query).every((word) => text.includes(word));
@@ -251,7 +259,7 @@ export type ActiveFilter = { key: FilterKey; label: string; href: string };
 
 export function activeFilters(filters: Filters): ActiveFilter[] {
   const labels: Partial<Record<FilterKey, string>> = {
-    q: filters.q ? `"${filters.q}"` : undefined,
+    q: filters.q ? `"${searchLabel(filters.q)}"` : undefined,
     body: filters.body && BODY_TYPE_LABELS[filters.body],
     make: filters.make,
     model: filters.model,

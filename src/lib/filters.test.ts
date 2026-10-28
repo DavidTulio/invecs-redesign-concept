@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchSuggestions, searchWords } from "./filters";
+import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchLabel, searchSuggestions, searchWords } from "./filters";
 import type { Car } from "./types";
 
 let id = 0;
@@ -152,5 +152,14 @@ describe("text search", () => {
     expect(applyFilters(stock, filters)).toEqual([]);
     expect(searchSuggestions(stock, filters).map((c) => c.model)).toEqual(["Fortuner"]);
     expect(searchSuggestions(stock, parseFilters({ q: "zzz" }))).toHaveLength(3);
+  });
+});
+
+describe("searchLabel", () => {
+  it("shows short searches in full and cuts long ones to 40 characters", () => {
+    expect(searchLabel("fortuner diesel")).toBe("fortuner diesel");
+    const long = "Call 0917 123 4567 now for a 50% discount on every car";
+    expect(searchLabel(long)).toBe("Call 0917 123 4567 now for a 50% discoun…");
+    expect(activeFilters(parseFilters({ q: long }))[0].label).toBe('"Call 0917 123 4567 now for a 50% discoun…"');
   });
 });

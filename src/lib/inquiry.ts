@@ -44,6 +44,8 @@ export function normalizePhilippineMobile(input: string) {
 }
 
 const countLinks = (text: string) => (text.match(/https?:\/\/|www\./gi) ?? []).length;
+// Short fields never need a web address; refusing them stops spam like "www.spam.com" as a name.
+const noLinks = (text: string) => countLinks(text) === 0;
 
 const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
@@ -79,7 +81,8 @@ export function makeInquirySchema(now = new Date()) {
         .string({ error: "Enter your name" })
         .trim()
         .min(2, "Enter your name")
-        .max(80, "Keep your name under 80 characters"),
+        .max(80, "Keep your name under 80 characters")
+        .refine(noLinks, "Please enter your name without web links"),
       phone: z.preprocess(
         emptyToUndefined,
         z
@@ -115,8 +118,14 @@ export function makeInquirySchema(now = new Date()) {
         .refine((text) => countLinks(text) <= 2, "Please remove the links from your message")
         .default(""),
       trade_in: z.preprocess((value) => value === "yes", z.boolean()),
-      trade_in_make: z.preprocess(emptyToUndefined, z.string().trim().max(40, "Keep the make under 40 characters").optional()),
-      trade_in_model: z.preprocess(emptyToUndefined, z.string().trim().max(60, "Keep the model under 60 characters").optional()),
+      trade_in_make: z.preprocess(
+        emptyToUndefined,
+        z.string().trim().max(40, "Keep the make under 40 characters").refine(noLinks, "Enter the make without web links").optional(),
+      ),
+      trade_in_model: z.preprocess(
+        emptyToUndefined,
+        z.string().trim().max(60, "Keep the model under 60 characters").refine(noLinks, "Enter the model without web links").optional(),
+      ),
       trade_in_year: z.preprocess(
         plainNumber,
         z.coerce
@@ -141,7 +150,7 @@ export function makeInquirySchema(now = new Date()) {
           .string()
           .trim()
           .max(TRADE_IN_NOTES_MAX, `Keep the notes under ${TRADE_IN_NOTES_MAX} characters`)
-          .refine((text) => countLinks(text) === 0, "Please remove the links from the notes")
+          .refine(noLinks, "Please remove the links from the notes")
           .optional(),
       ),
     })

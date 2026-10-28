@@ -8,7 +8,7 @@ import { FilterPanel } from "@/components/inventory/FilterPanel";
 import { SearchBox } from "@/components/inventory/SearchBox";
 import { SortSelect } from "@/components/inventory/SortSelect";
 import { getAllCars } from "@/lib/data/cars";
-import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchSuggestions } from "@/lib/filters";
+import { activeFilters, applyFilters, getFacets, inventoryHref, parseFilters, searchLabel, searchSuggestions } from "@/lib/filters";
 
 export const metadata: Metadata = {
   title: "Cars for sale",
@@ -84,7 +84,7 @@ async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, 
             ) : filters.q ? (
               <>
                 <div className="mt-5 rounded-card border border-dashed border-line p-8 text-center">
-                  <p className="font-semibold break-words">No cars match &ldquo;{filters.q}&rdquo;{chips.length > 1 ? " with these filters" : ""}.</p>
+                  <p className="font-semibold break-words">No cars match &ldquo;{searchLabel(filters.q)}&rdquo;{chips.length > 1 ? " with these filters" : ""}.</p>
                   <p className="mt-1 text-sm text-muted">Try fewer or different words, like a make or model.</p>
                   <div className="mt-4 flex flex-wrap justify-center gap-3">
                     <Link
