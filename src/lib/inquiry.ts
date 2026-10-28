@@ -21,6 +21,9 @@ export const TRADE_IN_OLDEST_YEAR = 1980;
 export const TRADE_IN_MAX_KM = 1_000_000;
 export const TRADE_IN_NOTES_MAX = 300;
 
+/** Private staff notes on an inquiry (admin only). */
+export const STAFF_NOTES_MAX = 1000;
+
 /** Test-drive start times: hourly within showroom hours (8 AM–6 PM), so every drive ends before closing. */
 export const TEST_DRIVE_TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"] as const;
 

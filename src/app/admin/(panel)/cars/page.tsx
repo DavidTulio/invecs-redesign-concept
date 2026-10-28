@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ImageOff, Plus } from "lucide-react";
+import { ImageOff, Plus, Star } from "lucide-react";
 import { CarStatusSelect } from "@/components/admin/CarStatusSelect";
 import { PageSkeleton } from "@/components/admin/PageSkeleton";
 import { CAR_STATUSES } from "@/lib/car-schema";
@@ -23,6 +23,7 @@ type Row = {
   price_php: number;
   mileage_km: number;
   status: string;
+  featured: boolean;
   car_photos: { path: string; position: number }[];
 };
 
@@ -45,7 +46,7 @@ async function AdminCarsContent({ searchParams }: PageProps<"/admin/cars">) {
 
   const { data } = await supabase
     .from("cars")
-    .select("id, slug, year, make, model, variant, price_php, mileage_km, status, car_photos(path, position)")
+    .select("id, slug, year, make, model, variant, price_php, mileage_km, status, featured, car_photos(path, position)")
     .order("created_at", { ascending: false });
   const all = (data ?? []) as Row[];
   const cars = filter ? all.filter((car) => car.status === filter) : all;
@@ -125,6 +126,12 @@ async function AdminCarsContent({ searchParams }: PageProps<"/admin/cars">) {
                   <Link href={`/admin/cars/${car.id}`} className="font-semibold hover:underline">
                     {title}
                   </Link>
+                  {car.featured && (
+                    <span className="ml-2 inline-flex items-center gap-1 align-middle text-xs font-semibold text-ink-2">
+                      <Star aria-hidden size={13} className="fill-current" />
+                      Featured
+                    </span>
+                  )}
                   <p className="truncate text-sm text-muted">
                     {car.variant} · {formatKm(car.mileage_km)} · {car.car_photos.length}{" "}
                     {car.car_photos.length === 1 ? "photo" : "photos"}

@@ -32,6 +32,7 @@ function car(overrides: Partial<Car>): Car {
     description: "",
     features: [],
     status: "available",
+    featured: false,
     created_at: `2026-10-${String(id).padStart(2, "0")}T00:00:00Z`,
     photos: [],
     ...overrides,

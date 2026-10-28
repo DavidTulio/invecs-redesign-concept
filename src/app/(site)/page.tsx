@@ -4,12 +4,13 @@ import { BodyTypeShowroom } from "@/components/home/BodyTypeShowroom";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { LatestArrivals } from "@/components/home/LatestArrivals";
 import { WhyBuyHere } from "@/components/home/WhyBuyHere";
+import { FEATURED_MAX } from "@/lib/car-schema";
 import { getAllCars } from "@/lib/data/cars";
-import { bodyTypeSummaries, inStock } from "@/lib/inventory";
+import { bodyTypeSummaries, inStock, latestArrivals } from "@/lib/inventory";
 
 export default async function HomePage() {
   const available = inStock(await getAllCars()); // already newest first
-  const latest = available.slice(0, 6);
+  const latest = latestArrivals(available, 6, FEATURED_MAX); // featured cars first
   // Send the search form only the four fields it needs, not every description and photo.
   const searchCars = available.map(({ body_type, make, model, price_php }) => ({
     body_type,

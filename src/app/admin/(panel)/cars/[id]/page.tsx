@@ -94,6 +94,7 @@ async function EditCarContent({ params, searchParams }: PageProps<"/admin/cars/[
             description: car.description,
             features: car.features.join("\n"),
             status: car.status,
+            featured: car.featured ? "yes" : "",
           }}
         />
       </div>

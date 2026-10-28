@@ -49,6 +49,7 @@ async function NewCarContent() {
             description: "",
             features: "",
             status: "available",
+            featured: "",
           }}
         />
       </div>

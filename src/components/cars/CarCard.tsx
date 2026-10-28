@@ -9,13 +9,29 @@ import { StatusBadge } from "./StatusBadge";
 const CARD_SIZES = "(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw";
 
 /** A listing card shaped like a dealer's hang tag: details on top, price below the tear line. */
-export function CarCard({ car, preload = false }: { car: Car; preload?: boolean }) {
+export function CarCard({
+  car,
+  preload = false,
+  showFeatured = false,
+}: {
+  car: Car;
+  preload?: boolean;
+  /** Only the home page's "Latest arrivals" marks featured cars. */
+  showFeatured?: boolean;
+}) {
   return (
     <article className="group relative flex w-full min-w-0 flex-col overflow-hidden rounded-card border border-line bg-paper transition-shadow hover:shadow-[0_8px_24px_-12px_rgb(14_26_43/0.3)]">
       <div className="relative aspect-[16/10] max-w-full overflow-hidden bg-soft">
         <CarImage photo={car.photos[0]} bodyType={car.body_type} sizes={CARD_SIZES} preload={preload} />
-        {car.status !== "available" && (
+        {car.status !== "available" ? (
           <StatusBadge status={car.status} className="absolute top-3 left-3" />
+        ) : (
+          showFeatured &&
+          car.featured && (
+            <span className="absolute top-3 left-3 rounded-full bg-paper px-2.5 py-1 text-xs font-semibold tracking-wide text-ink uppercase shadow-[0_1px_3px_rgb(14_26_43/0.2)]">
+              Featured
+            </span>
+          )
         )}
         {/* Only the heart sits on the photo; Compare lives on the car page and the Saved page. */}
         <div className="absolute top-2.5 right-2.5">

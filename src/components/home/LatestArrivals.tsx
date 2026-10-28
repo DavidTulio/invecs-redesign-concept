@@ -32,7 +32,7 @@ export function LatestArrivals({ cars, total }: { cars: Car[]; total: number }) 
         <ul className="mt-6 grid gap-4 [--tag-bg:var(--color-soft)] sm:grid-cols-2 lg:grid-cols-3">
           {cars.map((car) => (
             <li key={car.id} className="flex">
-              <CarCard car={car} />
+              <CarCard car={car} showFeatured />
             </li>
           ))}
         </ul>

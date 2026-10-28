@@ -4,6 +4,8 @@ import { BODY_TYPES, FUELS, TRANSMISSIONS } from "./types";
 export const CAR_STATUSES = ["available", "reserved", "sold"] as const;
 
 export const MAX_FEATURES = 40;
+/** Featured cars lead the home page's "Latest arrivals"; a small number keeps it meaningful. */
+export const FEATURED_MAX = 3;
 export const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 
 /** "1,250,000" or "₱ 1 250 000" → 1250000, so admins can type prices naturally. */
@@ -50,6 +52,7 @@ export function makeCarSchema(now = new Date()) {
           .max(MAX_FEATURES, `List up to ${MAX_FEATURES} features`),
       ),
     status: z.enum(CAR_STATUSES, { error: "Choose a status" }),
+    featured: z.preprocess((value) => value === "yes", z.boolean()),
   });
 }
 

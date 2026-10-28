@@ -5,6 +5,17 @@ export function inStock(cars: Car[]) {
   return cars.filter((car) => car.status !== "sold");
 }
 
+/**
+ * The home page's "Latest arrivals": cars staff featured come first (sold ones never
+ * count), then the newest of the rest. `cars` must already be newest first.
+ */
+export function latestArrivals(cars: Car[], limit = 6, featuredMax = 3) {
+  const stock = inStock(cars);
+  const featured = stock.filter((car) => car.featured).slice(0, featuredMax);
+  const rest = stock.filter((car) => !featured.includes(car));
+  return [...featured, ...rest].slice(0, limit);
+}
+
 export type BodyTypeSummary = {
   type: BodyType;
   count: number;

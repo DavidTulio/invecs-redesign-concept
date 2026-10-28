@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import { CalendarDays, Mail, MessageCircle, Phone, Repeat, Smartphone } from "lucide-react";
+import { CalendarDays, Download, Mail, MessageCircle, Phone, Repeat, Smartphone } from "lucide-react";
 import { InquiryActions } from "@/components/admin/InquiryActions";
 import { PageSkeleton } from "@/components/admin/PageSkeleton";
+import { StaffNotes } from "@/components/admin/StaffNotes";
 import { formatDateTime, formatDay } from "@/lib/admin-format";
 import { formatKm } from "@/lib/format";
 import {
@@ -32,6 +33,7 @@ type Row = {
   trade_in_year: number | null;
   trade_in_mileage_km: number | null;
   trade_in_notes: string | null;
+  staff_notes: string;
   status: InquiryStatus;
   created_at: string;
   cars: { slug: string; year: number; make: string; model: string; variant: string } | null;
@@ -64,7 +66,7 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
 
   const { data } = await supabase
     .from("inquiries")
-    .select("id, name, phone, email, contact_method, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, status, created_at, cars(slug, year, make, model, variant)")
+    .select("id, name, phone, email, contact_method, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, staff_notes, status, created_at, cars(slug, year, make, model, variant)")
     .order("created_at", { ascending: false });
   const all = (data ?? []) as unknown as Row[];
   const inquiries = filter ? all.filter((inquiry) => inquiry.status === filter) : all;
@@ -81,11 +83,24 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
 
   return (
     <div className="grid gap-6">
-      <div>
-        <h1 className="font-wide text-3xl font-extrabold">Inquiries</h1>
-        <p className="mt-1 text-sm text-muted">
-          Newest first. Inquiries are deleted automatically after 30 days.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-wide text-3xl font-extrabold">Inquiries</h1>
+          <p className="mt-1 text-sm text-muted">
+            Newest first. Inquiries are deleted automatically after 30 days.
+          </p>
+        </div>
+        {inquiries.length > 0 && (
+          // A plain download link; the file is built fresh for the tab you're on.
+          <a
+            href={`/admin/inquiries/export${filter ? `?status=${filter}` : ""}`}
+            download
+            className="inline-flex items-center gap-2 rounded-field border border-line bg-paper px-3 py-2 text-sm font-semibold hover:border-ink"
+          >
+            <Download aria-hidden size={16} />
+            Download CSV
+          </a>
+        )}
       </div>
 
       <nav aria-label="Filter by status">
@@ -195,6 +210,8 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
                     {inquiry.message}
                   </p>
                 )}
+
+                <StaffNotes id={inquiry.id} initial={inquiry.staff_notes} name={inquiry.name} />
               </li>
             );
           })}

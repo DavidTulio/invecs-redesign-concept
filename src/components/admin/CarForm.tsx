@@ -5,7 +5,7 @@ import { Save } from "lucide-react";
 import { saveCar, type CarFormState } from "@/actions/admin-cars";
 import { useHydrated } from "@/lib/use-hydrated";
 import { Field, describedBy, inputClass } from "@/components/forms/Field";
-import { MAX_FEATURES } from "@/lib/car-schema";
+import { FEATURED_MAX, MAX_FEATURES } from "@/lib/car-schema";
 import { BODY_TYPE_LABELS, BODY_TYPES, FUEL_LABELS, FUELS, TRANSMISSION_LABELS, TRANSMISSIONS } from "@/lib/types";
 
 export type CarFormValues = {
@@ -23,6 +23,8 @@ export type CarFormValues = {
   description: string;
   features: string;
   status: string;
+  /** "yes" when the car is featured on the home page. */
+  featured: string;
 };
 
 export function CarForm({ initial }: { initial: CarFormValues }) {
@@ -101,6 +103,29 @@ export function CarForm({ initial }: { initial: CarFormValues }) {
           reserved: "Reserved",
           sold: "Sold",
         })}
+        <div className="grid content-start gap-1.5 sm:col-span-3">
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5 font-semibold">
+            <input
+              type="checkbox"
+              name="featured"
+              value="yes"
+              defaultChecked={v.featured === "yes"}
+              aria-describedby={e.featured ? "featured-error" : "featured-hint"}
+              aria-invalid={e.featured ? true : undefined}
+              className="size-5 accent-[var(--color-ink)]"
+            />
+            Feature on the home page
+          </label>
+          {e.featured ? (
+            <p id="featured-error" className="text-sm font-medium text-signal">
+              {e.featured}
+            </p>
+          ) : (
+            <p id="featured-hint" className="text-xs text-muted">
+              Shown first in &ldquo;Latest arrivals&rdquo;, up to {FEATURED_MAX} cars. Sold cars are removed automatically.
+            </p>
+          )}
+        </div>
       </fieldset>
 
       <Field id="description" label="Description" error={e.description}>

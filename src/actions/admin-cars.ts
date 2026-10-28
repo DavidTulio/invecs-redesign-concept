@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "@/lib/zod";
-import { CAR_STATUSES, makeCarSchema, PHOTO_MAX_BYTES, sniffImageType, uuidSchema } from "@/lib/car-schema";
+import { CAR_STATUSES, FEATURED_MAX, makeCarSchema, PHOTO_MAX_BYTES, sniffImageType, uuidSchema } from "@/lib/car-schema";
 import { CARS_TAG } from "@/lib/data/cars";
 import { requireAdmin } from "@/lib/server/auth";
 import { carSlug } from "@/lib/slug";
@@ -16,7 +16,7 @@ import { carTitle } from "@/lib/types";
 const BUCKET = "car-photos";
 const FIELDS = [
   "make", "model", "variant", "year", "body_type", "transmission", "fuel",
-  "mileage_km", "price_php", "color", "description", "features", "status",
+  "mileage_km", "price_php", "color", "description", "features", "status", "featured",
 ] as const;
 
 export type CarFormState = {
@@ -55,12 +55,30 @@ export async function saveCar(_previous: CarFormState, formData: FormData): Prom
     return { status: "error", message: "Please check the highlighted fields.", errors, values };
   }
 
+  // A sold car can't stay featured; otherwise keep to FEATURED_MAX featured cars.
+  const car = { ...parsed.data, featured: parsed.data.featured && parsed.data.status !== "sold" };
   const rawId = formData.get("id");
-  if (rawId) {
+  const id = rawId ? uuidSchema.safeParse(rawId) : null;
+  if (id && !id.success) return { status: "error", message: "Unknown car.", values };
+
+  if (car.featured) {
+    let others = supabase.from("cars").select("id", { count: "exact", head: true }).eq("featured", true).neq("status", "sold");
+    if (id) others = others.neq("id", id.data);
+    const { count, error } = await others;
+    if (error) return { status: "error", message: "Couldn't save the car. Please try again.", values };
+    if ((count ?? 0) >= FEATURED_MAX) {
+      return {
+        status: "error",
+        message: "Please check the highlighted fields.",
+        errors: { featured: `You can feature up to ${FEATURED_MAX} cars. Remove one first.` },
+        values,
+      };
+    }
+  }
+
+  if (id) {
     // Editing. The link (slug) stays the same so shared links keep working.
-    const id = uuidSchema.safeParse(rawId);
-    if (!id.success) return { status: "error", message: "Unknown car.", values };
-    const { error } = await supabase.from("cars").update(parsed.data).eq("id", id.data);
+    const { error } = await supabase.from("cars").update(car).eq("id", id.data);
     if (error) {
       console.error("Updating car failed:", error.message);
       return { status: "error", message: "Couldn't save the car. Please try again.", values };
@@ -69,10 +87,10 @@ export async function saveCar(_previous: CarFormState, formData: FormData): Prom
     return { status: "saved", message: "Changes saved. The public site is updated." };
   }
 
-  const slug = await uniqueSlug(supabase, carSlug(parsed.data));
+  const slug = await uniqueSlug(supabase, carSlug(car));
   const { data: created, error } = await supabase
     .from("cars")
-    .insert({ ...parsed.data, slug })
+    .insert({ ...car, slug })
     .select("id")
     .single();
   if (error || !created) {
@@ -87,7 +105,11 @@ export async function setCarStatus(carId: string, status: string) {
   const { supabase } = await requireAdmin();
   const id = uuidSchema.parse(carId);
   const next = z.enum(CAR_STATUSES).parse(status);
-  const { error } = await supabase.from("cars").update({ status: next }).eq("id", id);
+  // Marking a car sold also takes it off the home page's featured spots.
+  const { error } = await supabase
+    .from("cars")
+    .update(next === "sold" ? { status: next, featured: false } : { status: next })
+    .eq("id", id);
   if (error) throw new Error("Couldn't change the status.");
   carsChanged();
 }

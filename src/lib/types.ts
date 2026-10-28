@@ -51,6 +51,8 @@ export type Car = {
   description: string;
   features: string[];
   status: CarStatus;
+  /** Shown first in the home page's "Latest arrivals" (staff choose up to 3). */
+  featured: boolean;
   created_at: string;
   /** Sorted by position; the first one is the cover photo. */
   photos: CarPhoto[];
