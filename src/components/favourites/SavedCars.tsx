@@ -16,16 +16,15 @@ export function SavedCars({ cars }: { cars: Car[] }) {
   const hydrated = useHydrated();
   const { list, remove, clear } = useFavourites();
 
-  if (!hydrated)
-    return <p className="mt-6 text-muted">Loading your saved cars…</p>;
+  if (!hydrated) return <p className="mt-6 text-muted">Loading your saved cars…</p>;
 
   if (list.length === 0) {
     return (
       <div className="mt-6 max-w-xl rounded-card border border-line p-6">
         <p className="font-semibold">No saved cars yet.</p>
         <p className="mt-1 text-muted">
-          Tap the heart on any car to save it here. Saved cars stay on this
-          device, and we&apos;ll show you if a price drops.
+          Tap the heart on any car to save it here. Saved cars stay on this device, and we&apos;ll show
+          you if a price drops.
         </p>
         <Link
           href="/inventory"
@@ -48,10 +47,8 @@ export function SavedCars({ cars }: { cars: Car[] }) {
   return (
     <>
       <p className="mt-3 text-muted tabular-nums">
-        {listed.length} saved {listed.length === 1 ? "car" : "cars"}, kept on
-        this device only.
-        {listed.length > COMPARE_MAX &&
-          ` Pick up to ${COMPARE_MAX} with "Compare" to see them side by side.`}
+        {listed.length} saved {listed.length === 1 ? "car" : "cars"}, kept on this device only.
+        {pickToCompare && ` Pick up to ${COMPARE_MAX} with "Compare" to see them side by side.`}
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {compareAll && (
@@ -63,11 +60,7 @@ export function SavedCars({ cars }: { cars: Car[] }) {
             <ArrowRight aria-hidden size={16} />
           </Link>
         )}
-        <button
-          type="button"
-          onClick={clear}
-          className="min-h-11 px-1 text-sm font-semibold text-muted hover:text-ink"
-        >
+        <button type="button" onClick={clear} className="min-h-11 px-1 text-sm font-semibold text-muted hover:text-ink">
           Clear all
         </button>
       </div>
@@ -77,11 +70,10 @@ export function SavedCars({ cars }: { cars: Car[] }) {
           const car = bySlug.get(item.slug);
           if (!car) return null;
           const change = priceChange(item.savedPrice, car.price_php);
-          const showRow = change || pickToCompare;
           return (
             <li key={item.slug} className="flex flex-col gap-2">
               <CarCard car={car} />
-              {showRow && (
+              {(change || pickToCompare) && (
                 <div className="flex min-h-10 items-center justify-between gap-3">
                   {change ? (
                     <p
@@ -94,15 +86,12 @@ export function SavedCars({ cars }: { cars: Car[] }) {
                       ) : (
                         <TrendingUp aria-hidden size={16} />
                       )}
-                      {change.direction === "down" ? "Down" : "Up"}{" "}
-                      {formatPeso(change.amount)} since you saved it
+                      {change.direction === "down" ? "Down" : "Up"} {formatPeso(change.amount)} since you saved it
                     </p>
                   ) : (
                     <span />
                   )}
-                  {pickToCompare && (
-                    <CompareButton slug={car.slug} title={item.title} />
-                  )}
+                  {pickToCompare && <CompareButton slug={car.slug} title={item.title} />}
                 </div>
               )}
             </li>
@@ -117,10 +106,7 @@ export function SavedCars({ cars }: { cars: Car[] }) {
           </h2>
           <ul className="mt-3 grid gap-2">
             {gone.map((item) => (
-              <li
-                key={item.slug}
-                className="flex items-center justify-between gap-3 rounded-field bg-soft py-2 pr-2 pl-4 text-sm"
-              >
+              <li key={item.slug} className="flex items-center justify-between gap-3 rounded-field bg-soft py-2 pr-2 pl-4 text-sm">
                 <span className="min-w-0 truncate">{item.title}</span>
                 <button
                   type="button"
