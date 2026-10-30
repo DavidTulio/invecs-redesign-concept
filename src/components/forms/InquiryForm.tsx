@@ -10,7 +10,11 @@ import {
   fieldErrors,
   formatTimeSlot,
   makeInquirySchema,
+  makeQuestionSchema,
   MESSAGE_MAX,
+  QUESTION_TOPIC_LABELS,
+  QUESTION_TOPICS,
+  type QuestionTopic,
   type ContactMethod,
   TEST_DRIVE_TIMES,
   TRADE_IN_NOTES_MAX,
@@ -23,9 +27,15 @@ export type CarOption = { slug: string; label: string; price: number; reserved: 
 
 const INITIAL: InquiryState = { status: "idle" };
 
+/**
+ * The test-drive form, or with kind="question" the contact form's short version:
+ * a topic and a question instead of a car, date, time and trade-in.
+ */
 export function InquiryForm({
-  cars,
+  kind = "test-drive",
+  cars = [],
   defaultCar,
+  defaultTopic,
   defaultMessage,
   defaultTradeIn = false,
   formStamp,
@@ -33,15 +43,18 @@ export function InquiryForm({
   maxDate,
   siteKey,
 }: {
-  cars: CarOption[];
+  kind?: "test-drive" | "question";
+  cars?: CarOption[];
   defaultCar?: string;
+  /** From "Ask about a service": the question's topic already chosen. */
+  defaultTopic?: QuestionTopic;
   /** A question already written for the buyer (from "Ask for more details"). */
   defaultMessage?: string;
   /** Start with "I have a car to trade in" ticked. */
   defaultTradeIn?: boolean;
   formStamp: string;
-  minDate: string;
-  maxDate: string;
+  minDate?: string;
+  maxDate?: string;
   siteKey: string;
 }) {
   const [state, formAction, pending] = useActionState(submitInquiry, INITIAL);
@@ -58,6 +71,7 @@ export function InquiryForm({
   const [messageLength, setMessageLength] = useState((values.message ?? defaultMessage ?? "").length);
   const [tradeIn, setTradeIn] = useState(state.status === "error" ? values.trade_in === "yes" : defaultTradeIn);
 
+  const isQuestion = kind === "question";
   const errors = clientErrors ?? (state.status === "error" ? state.errors : undefined) ?? {};
   const serverMessage = state.status === "error" ? state.message : undefined;
 
@@ -69,7 +83,7 @@ export function InquiryForm({
   // Check in the browser first for instant feedback; the server checks again regardless.
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const result = makeInquirySchema().safeParse(data);
+    const result = (isQuestion ? makeQuestionSchema() : makeInquirySchema()).safeParse(data);
     if (!result.success) {
       event.preventDefault();
       setClientErrors(fieldErrors(result.error));
@@ -82,9 +96,9 @@ export function InquiryForm({
     return (
       <div role="status" className="rounded-card border border-line p-6 sm:p-8">
         <CheckCircle2 aria-hidden size={32} className="text-ok" />
-        <h2 className="font-wide mt-3 text-2xl font-bold">Request received</h2>
+        <h2 className="font-wide mt-3 text-2xl font-bold">{isQuestion ? "Question received" : "Request received"}</h2>
         <p className="mt-2 max-w-[55ch] text-ink-2">
-          Thanks{state.message ? `, ${state.message}` : ""}. Your request is saved in this demo&apos;s
+          Thanks{state.message ? `, ${state.message}` : ""}. Your {isQuestion ? "question" : "request"} is saved in this demo&apos;s
           admin inbox. On a live site, the dealer would now contact you by your chosen method.
         </p>
         <p className="mt-2 text-sm font-semibold text-warn">
@@ -97,7 +111,7 @@ export function InquiryForm({
           }}
           className="mt-6 rounded-field border border-line px-4 py-2.5 font-semibold hover:border-ink"
         >
-          Send another request
+          {isQuestion ? "Ask another question" : "Send another request"}
         </button>
       </div>
     );
@@ -119,22 +133,45 @@ export function InquiryForm({
         )}
       </div>
 
-      <Field id="car" label="Car you're interested in" error={errors.car}>
-        <select
-          {...describedBy("car", errors.car)}
-          name="car"
-          defaultValue={values.car ?? defaultCar ?? ""}
-          className={inputClass}
-        >
-          <option value="">No specific car / general question</option>
-          {cars.map((car) => (
-            <option key={car.slug} value={car.slug}>
-              {car.label} · {formatPeso(car.price)}
-              {car.reserved ? " (reserved)" : ""}
+      <input type="hidden" name="kind" value={kind} />
+
+      {isQuestion ? (
+        <Field id="topic" label="Your question is about" required error={errors.topic}>
+          <select
+            {...describedBy("topic", errors.topic)}
+            name="topic"
+            required
+            defaultValue={values.topic ?? defaultTopic ?? ""}
+            className={inputClass}
+          >
+            <option value="" disabled>
+              Choose a topic
             </option>
-          ))}
-        </select>
-      </Field>
+            {QUESTION_TOPICS.map((topic) => (
+              <option key={topic} value={topic}>
+                {QUESTION_TOPIC_LABELS[topic]}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : (
+        <Field id="car" label="Car you're interested in" error={errors.car}>
+          <select
+            {...describedBy("car", errors.car)}
+            name="car"
+            defaultValue={values.car ?? defaultCar ?? ""}
+            className={inputClass}
+          >
+            <option value="">No specific car / general question</option>
+            {cars.map((car) => (
+              <option key={car.slug} value={car.slug}>
+                {car.label} · {formatPeso(car.price)}
+                {car.reserved ? " (reserved)" : ""}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
 
       <Field id="name" label="Your name" required error={errors.name}>
         <input
@@ -208,46 +245,54 @@ export function InquiryForm({
         </Field>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field id="preferred_date" label="Preferred test-drive date" required error={errors.preferred_date}>
-          <input
-            {...describedBy("preferred_date", errors.preferred_date)}
-            name="preferred_date"
-            type="date"
+      {!isQuestion && (
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field
+            id="preferred_date"
+            label="Preferred test-drive date"
             required
-            min={minDate}
-            max={maxDate}
-            defaultValue={values.preferred_date}
-            className={inputClass}
-          />
-        </Field>
-        <Field
-          id="preferred_time"
-          label="Preferred time"
-          required
-          hint="We'll confirm by your chosen contact method."
-          error={errors.preferred_time}
-        >
-          <select
-            {...describedBy("preferred_time", errors.preferred_time, "hint")}
-            name="preferred_time"
-            required
-            defaultValue={values.preferred_time ?? ""}
-            className={inputClass}
+            hint="Monday to Saturday. We're closed on Sundays."
+            error={errors.preferred_date}
           >
-            <option value="" disabled>
-              Choose a time
-            </option>
-            {TEST_DRIVE_TIMES.map((time) => (
-              <option key={time} value={time}>
-                {formatTimeSlot(time)}
+            <input
+              {...describedBy("preferred_date", errors.preferred_date, "hint")}
+              name="preferred_date"
+              type="date"
+              required
+              min={minDate}
+              max={maxDate}
+              defaultValue={values.preferred_date}
+              className={inputClass}
+            />
+          </Field>
+          <Field
+            id="preferred_time"
+            label="Preferred time"
+            required
+            hint="We'll confirm by your chosen contact method."
+            error={errors.preferred_time}
+          >
+            <select
+              {...describedBy("preferred_time", errors.preferred_time, "hint")}
+              name="preferred_time"
+              required
+              defaultValue={values.preferred_time ?? ""}
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Choose a time
               </option>
-            ))}
-          </select>
-        </Field>
-      </div>
+              {TEST_DRIVE_TIMES.map((time) => (
+                <option key={time} value={time}>
+                  {formatTimeSlot(time)}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+      )}
 
-      <Field id="message" label="Message" error={errors.message}>
+      <Field id="message" label={isQuestion ? "Your question" : "Message"} required={isQuestion} error={errors.message}>
         <textarea
           {...describedBy("message", errors.message)}
           name="message"
@@ -255,7 +300,7 @@ export function InquiryForm({
           maxLength={MESSAGE_MAX}
           defaultValue={values.message ?? defaultMessage}
           onChange={(event) => setMessageLength(event.target.value.length)}
-          placeholder="Questions about the car or financing"
+          placeholder={isQuestion ? "Type your question" : "Questions about the car or financing"}
           className={`${inputClass} resize-y`}
         />
         <p className="text-right text-xs text-muted tabular-nums">
@@ -264,86 +309,88 @@ export function InquiryForm({
       </Field>
 
       {/* Optional trade-in: hidden until ticked, so the form stays short for everyone else. */}
-      <div className="grid gap-4">
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5 font-semibold">
-          <input
-            type="checkbox"
-            name="trade_in"
-            value="yes"
-            checked={tradeIn}
-            onChange={(event) => setTradeIn(event.target.checked)}
-            aria-controls={tradeIn ? "trade-in-details" : undefined}
-            className="size-5 accent-[var(--color-ink)]"
-          />
-          I have a car to trade in
-        </label>
+      {!isQuestion && (
+        <div className="grid gap-4">
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5 font-semibold">
+            <input
+              type="checkbox"
+              name="trade_in"
+              value="yes"
+              checked={tradeIn}
+              onChange={(event) => setTradeIn(event.target.checked)}
+              aria-controls={tradeIn ? "trade-in-details" : undefined}
+              className="size-5 accent-[var(--color-ink)]"
+            />
+            I have a car to trade in
+          </label>
 
-        {tradeIn && (
-          <fieldset id="trade-in-details" className="grid gap-4 rounded-card border border-line bg-soft p-4">
-            <legend className="sr-only">Your trade-in car</legend>
-            <p className="text-sm text-muted">We&apos;ll give you an estimate after we see the car in person.</p>
-            <div className="grid gap-4 sm:grid-cols-[1fr_1fr_8rem]">
-              <Field id="trade_in_make" label="Make" required error={errors.trade_in_make}>
+          {tradeIn && (
+            <fieldset id="trade-in-details" className="grid gap-4 rounded-card border border-line bg-soft p-4">
+              <legend className="sr-only">Your trade-in car</legend>
+              <p className="text-sm text-muted">We&apos;ll give you an estimate after we see the car in person.</p>
+              <div className="grid gap-4 sm:grid-cols-[1fr_1fr_8rem]">
+                <Field id="trade_in_make" label="Make" required error={errors.trade_in_make}>
+                  <input
+                    {...describedBy("trade_in_make", errors.trade_in_make)}
+                    name="trade_in_make"
+                    maxLength={40}
+                    autoComplete="off"
+                    placeholder="Toyota"
+                    defaultValue={values.trade_in_make}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field id="trade_in_model" label="Model" required error={errors.trade_in_model}>
+                  <input
+                    {...describedBy("trade_in_model", errors.trade_in_model)}
+                    name="trade_in_model"
+                    maxLength={60}
+                    autoComplete="off"
+                    placeholder="Vios"
+                    defaultValue={values.trade_in_model}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field id="trade_in_year" label="Year" required error={errors.trade_in_year}>
+                  <input
+                    {...describedBy("trade_in_year", errors.trade_in_year)}
+                    name="trade_in_year"
+                    inputMode="numeric"
+                    maxLength={4}
+                    autoComplete="off"
+                    placeholder="2016"
+                    defaultValue={values.trade_in_year}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <Field id="trade_in_mileage" label="Mileage (km)" error={errors.trade_in_mileage}>
                 <input
-                  {...describedBy("trade_in_make", errors.trade_in_make)}
-                  name="trade_in_make"
-                  maxLength={40}
-                  autoComplete="off"
-                  placeholder="Toyota"
-                  defaultValue={values.trade_in_make}
-                  className={inputClass}
-                />
-              </Field>
-              <Field id="trade_in_model" label="Model" required error={errors.trade_in_model}>
-                <input
-                  {...describedBy("trade_in_model", errors.trade_in_model)}
-                  name="trade_in_model"
-                  maxLength={60}
-                  autoComplete="off"
-                  placeholder="Vios"
-                  defaultValue={values.trade_in_model}
-                  className={inputClass}
-                />
-              </Field>
-              <Field id="trade_in_year" label="Year" required error={errors.trade_in_year}>
-                <input
-                  {...describedBy("trade_in_year", errors.trade_in_year)}
-                  name="trade_in_year"
+                  {...describedBy("trade_in_mileage", errors.trade_in_mileage)}
+                  name="trade_in_mileage"
                   inputMode="numeric"
-                  maxLength={4}
+                  maxLength={12}
                   autoComplete="off"
-                  placeholder="2016"
-                  defaultValue={values.trade_in_year}
-                  className={inputClass}
+                  placeholder="85,000"
+                  defaultValue={values.trade_in_mileage}
+                  className={`${inputClass} sm:max-w-60`}
                 />
               </Field>
-            </div>
-            <Field id="trade_in_mileage" label="Mileage (km)" error={errors.trade_in_mileage}>
-              <input
-                {...describedBy("trade_in_mileage", errors.trade_in_mileage)}
-                name="trade_in_mileage"
-                inputMode="numeric"
-                maxLength={12}
-                autoComplete="off"
-                placeholder="85,000"
-                defaultValue={values.trade_in_mileage}
-                className={`${inputClass} sm:max-w-60`}
-              />
-            </Field>
-            <Field id="trade_in_notes" label="Condition notes" error={errors.trade_in_notes}>
-              <textarea
-                {...describedBy("trade_in_notes", errors.trade_in_notes)}
-                name="trade_in_notes"
-                rows={2}
-                maxLength={TRADE_IN_NOTES_MAX}
-                placeholder="Casa-maintained, minor scratches, new tires…"
-                defaultValue={values.trade_in_notes}
-                className={`${inputClass} resize-y`}
-              />
-            </Field>
-          </fieldset>
-        )}
-      </div>
+              <Field id="trade_in_notes" label="Condition notes" error={errors.trade_in_notes}>
+                <textarea
+                  {...describedBy("trade_in_notes", errors.trade_in_notes)}
+                  name="trade_in_notes"
+                  rows={2}
+                  maxLength={TRADE_IN_NOTES_MAX}
+                  placeholder="Casa-maintained, minor scratches, new tires…"
+                  defaultValue={values.trade_in_notes}
+                  className={`${inputClass} resize-y`}
+                />
+              </Field>
+            </fieldset>
+          )}
+        </div>
+      )}
 
       {/* Honeypot: hidden from people and screen readers; bots tend to fill every field. */}
       <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
@@ -369,7 +416,7 @@ export function InquiryForm({
         className="flex items-center justify-center gap-2 rounded-field bg-signal px-6 py-3.5 font-semibold text-white hover:bg-signal-dark disabled:cursor-not-allowed disabled:bg-muted sm:justify-self-start"
       >
         <Send aria-hidden size={18} />
-        {pending ? "Sending…" : token ? "Send request" : "Checking you're human…"}
+        {pending ? "Sending…" : token ? (isQuestion ? "Send question" : "Send request") : "Checking you're human…"}
       </button>
     </form>
   );

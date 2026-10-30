@@ -60,7 +60,6 @@ export async function SiteFooter() {
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-xs text-[#9aa5b5]">Sample hours for this concept.</p>
           </div>
         </div>
       </section>
@@ -69,8 +68,8 @@ export async function SiteFooter() {
         <div className="grid content-start gap-4">
           <Wordmark tone="light" />
           <p className="max-w-[36ch] text-sm leading-relaxed">
-            Used and nearly-new SUVs, pickups and sedans. Every car shows its full price
-            and a monthly estimate.
+            Pre-owned and brand-new cars: SUVs, pickups, sedans, hatchbacks and vans. Every car
+            shows its full price and a monthly estimate.
           </p>
         </div>
 

@@ -12,8 +12,10 @@ import {
   formatTimeSlot,
   INQUIRY_STATUS_LABELS,
   INQUIRY_STATUSES,
+  questionLabel,
   type ContactMethod,
   type InquiryStatus,
+  type QuestionTopic,
 } from "@/lib/inquiry";
 import { requireAdmin } from "@/lib/server/auth";
 
@@ -25,6 +27,7 @@ type Row = {
   phone: string | null;
   email: string | null;
   contact_method: ContactMethod;
+  topic: QuestionTopic | null;
   preferred_date: string | null;
   preferred_time: string | null;
   message: string;
@@ -66,7 +69,7 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
 
   const { data } = await supabase
     .from("inquiries")
-    .select("id, name, phone, email, contact_method, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, staff_notes, status, created_at, cars(slug, year, make, model, variant)")
+    .select("id, name, phone, email, contact_method, topic, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, staff_notes, status, created_at, cars(slug, year, make, model, variant)")
     .order("created_at", { ascending: false });
   const all = (data ?? []) as unknown as Row[];
   const inquiries = filter ? all.filter((inquiry) => inquiry.status === filter) : all;
@@ -156,7 +159,7 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
                           {inquiry.cars.year} {inquiry.cars.make} {inquiry.cars.model} {inquiry.cars.variant}
                         </Link>
                       ) : (
-                        "General question"
+                        questionLabel(inquiry.topic)
                       )}
                     </dd>
                   </div>
@@ -183,7 +186,7 @@ async function InquiriesContent({ searchParams }: PageProps<"/admin/inquiries">)
                           {inquiry.preferred_time && ` · ${formatTimeSlot(inquiry.preferred_time.slice(0, 5))}`}
                         </>
                       ) : (
-                        "Not given"
+                        <span className="font-normal text-muted">{inquiry.topic ? "Not a test drive" : "Not given"}</span>
                       )}
                     </dd>
                   </div>

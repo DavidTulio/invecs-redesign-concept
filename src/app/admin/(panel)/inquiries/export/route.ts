@@ -7,8 +7,10 @@ import {
   INQUIRY_STATUS_LABELS,
   INQUIRY_STATUSES,
   manilaDate,
+  questionLabel,
   type ContactMethod,
   type InquiryStatus,
+  type QuestionTopic,
 } from "@/lib/inquiry";
 import { requireAdmin } from "@/lib/server/auth";
 
@@ -17,6 +19,7 @@ type Row = {
   phone: string | null;
   email: string | null;
   contact_method: ContactMethod;
+  topic: QuestionTopic | null;
   preferred_date: string | null;
   preferred_time: string | null;
   message: string;
@@ -42,7 +45,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from("inquiries")
     .select(
-      "name, phone, email, contact_method, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, staff_notes, status, created_at, cars(year, make, model, variant)",
+      "name, phone, email, contact_method, topic, preferred_date, preferred_time, message, trade_in_make, trade_in_model, trade_in_year, trade_in_mileage_km, trade_in_notes, staff_notes, status, created_at, cars(year, make, model, variant)",
     )
     .order("created_at", { ascending: false });
   if (status) query = query.eq("status", status);
@@ -76,7 +79,7 @@ export async function GET(request: NextRequest) {
       row.phone?.replace(/^\+63/, "0") ?? "",
       row.email,
       CONTACT_METHOD_LABELS[row.contact_method],
-      row.cars ? `${row.cars.year} ${row.cars.make} ${row.cars.model} ${row.cars.variant}`.trim() : "General question",
+      row.cars ? `${row.cars.year} ${row.cars.make} ${row.cars.model} ${row.cars.variant}`.trim() : questionLabel(row.topic),
       row.preferred_date ? formatDay(row.preferred_date) : "",
       row.preferred_time ? formatTimeSlot(row.preferred_time.slice(0, 5)) : "",
       row.trade_in_make ? `${row.trade_in_year} ${row.trade_in_make} ${row.trade_in_model}` : "",

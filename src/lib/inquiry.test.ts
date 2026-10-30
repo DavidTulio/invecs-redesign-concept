@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { fieldErrors, formatTimeSlot, makeInquirySchema, manilaDate, normalizePhilippineMobile, tradeInOf } from "./inquiry";
+import {
+  fieldErrors,
+  formatTimeSlot,
+  isSunday,
+  makeInquirySchema,
+  makeQuestionSchema,
+  manilaDate,
+  normalizePhilippineMobile,
+  questionLabel,
+  tradeInOf,
+} from "./inquiry";
 
 // 16 Oct 2026, 11 PM in Manila (15:00 UTC). "Tomorrow" in Manila is 17 Oct.
 const NOW = new Date("2026-10-16T15:00:00Z");
@@ -190,5 +200,63 @@ describe("no web links in short fields", () => {
 
   it("still accepts ordinary names with dots", () => {
     expect(schema.safeParse({ ...valid, name: "Ma. Cristina R. Santos" }).success).toBe(true);
+  });
+});
+
+describe("Sundays", () => {
+  it("knows which dates are Sundays", () => {
+    expect(isSunday("2026-10-18")).toBe(true);
+    expect(isSunday("2026-10-17")).toBe(false);
+    expect(isSunday("2026-10-19")).toBe(false);
+  });
+
+  it("refuses a test drive on a Sunday, when the showroom is closed", () => {
+    expect(errorsFor({ ...valid, preferred_date: "2026-10-18" }).preferred_date).toMatch(/closed on Sundays/);
+    expect(errorsFor({ ...valid, preferred_date: "2026-10-19" }).preferred_date).toBeUndefined();
+  });
+});
+
+describe("question schema (contact form)", () => {
+  const question = makeQuestionSchema();
+  const ask = {
+    topic: "service",
+    name: "Juan dela Cruz",
+    phone: "0917 123 4567",
+    email: "",
+    contact_method: "call",
+    message: "How much is a PMS for a 2018 Vios?",
+  };
+  const questionErrors = (input: Record<string, unknown>) => {
+    const result = question.safeParse(input);
+    return result.success ? {} : fieldErrors(result.error);
+  };
+
+  it("accepts a question without a car, date or time", () => {
+    const result = question.parse(ask);
+    expect(result.topic).toBe("service");
+    expect(result.phone).toBe("+639171234567");
+  });
+
+  it("ignores test-drive fields sent along with a question", () => {
+    const result = question.parse({ ...ask, preferred_date: "2026-10-20", trade_in_make: "Toyota" });
+    expect(result).not.toHaveProperty("preferred_date");
+    expect(result).not.toHaveProperty("trade_in_make");
+  });
+
+  it("requires a topic from the list and a question", () => {
+    expect(questionErrors({ ...ask, topic: "" }).topic).toBe("Choose what your question is about");
+    expect(questionErrors({ ...ask, topic: "loans" }).topic).toBeDefined();
+    expect(questionErrors({ ...ask, message: "   " }).message).toBe("Type your question");
+  });
+
+  it("asks for the detail that matches the contact method, alongside other mistakes", () => {
+    const errors = questionErrors({ ...ask, contact_method: "email", topic: "" });
+    expect(errors.email).toBeDefined();
+    expect(errors.topic).toBeDefined();
+  });
+
+  it("labels questions for the admin inbox", () => {
+    expect(questionLabel("service")).toBe("Question about a service");
+    expect(questionLabel(null)).toBe("General question");
   });
 });

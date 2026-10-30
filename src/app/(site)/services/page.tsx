@@ -101,7 +101,7 @@ export default function ServicesPage() {
           Prices and availability depend on the car and the service. Ask us and we&apos;ll tell you.
         </p>
         <Link
-          href="/branches"
+          href="/branches?topic=service#ask"
           className="inline-flex min-h-12 items-center gap-2 rounded-field bg-ink px-5 font-semibold text-white hover:bg-ink-2"
         >
           Ask about a service

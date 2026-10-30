@@ -23,7 +23,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Cars for sale",
-  description: "Browse used and nearly-new SUVs, pickups and sedans with full prices and monthly estimates.",
+  description: "Browse pre-owned SUVs, pickups, sedans, hatchbacks and vans with full prices and monthly estimates.",
 };
 
 export default function InventoryPage({ searchParams }: PageProps<"/inventory">) {
