@@ -66,7 +66,7 @@ INVECS Autocentrum gave written permission (October 28, 2026) to use its **name 
 
 ## Photo and 3D model credits
 
-3D cars in "Shop by body type": the SUV, pickup and sedan from ["Generic passenger car pack"](https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5) by comrade1280, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: taken out of the pack, textures removed and recoloured grey, turned to face forward, a turntable disc added, and compressed (`public/models/`). The still pictures in `src/assets/showroom/` are renders of the same models.
+3D cars in "Shop by body type": the SUV, pickup, sedan, hatchback and minivan from ["Generic passenger car pack"](https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5) by comrade1280, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: taken out of the pack, textures removed and recoloured grey, turned to face forward, a turntable disc added, and compressed (`public/models/`). The still pictures in `src/assets/showroom/` are renders of the same models.
 
 Listing photos on the live site: **INVECS Autocentrum**, used with permission.
 

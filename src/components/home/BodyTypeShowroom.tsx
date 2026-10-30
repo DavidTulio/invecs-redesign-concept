@@ -4,9 +4,11 @@ import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowRight, Rotate3d } from "lucide-react";
+import hatchbackPoster from "@/assets/showroom/hatchback.webp";
 import pickupPoster from "@/assets/showroom/pickup.webp";
 import sedanPoster from "@/assets/showroom/sedan.webp";
 import suvPoster from "@/assets/showroom/suv.webp";
+import vanPoster from "@/assets/showroom/van.webp";
 import { CarSilhouette } from "@/components/cars/CarSilhouette";
 import { formatPesoShort } from "@/lib/format";
 import type { BodyTypeSummary } from "@/lib/inventory";
@@ -18,6 +20,8 @@ const MODELS: Partial<Record<BodyType, { src: string; poster: StaticImageData }>
   suv: { src: "/models/suv.glb", poster: suvPoster },
   pickup: { src: "/models/pickup.glb", poster: pickupPoster },
   sedan: { src: "/models/sedan.glb", poster: sedanPoster },
+  hatchback: { src: "/models/hatchback.glb", poster: hatchbackPoster },
+  van: { src: "/models/van.glb", poster: vanPoster },
 };
 
 const PLURAL: Record<BodyType, string> = {
@@ -183,7 +187,8 @@ export function BodyTypeShowroom({ summaries }: { summaries: BodyTypeSummary[] }
           <div
             role="group"
             aria-label="Body type"
-            className="grid auto-cols-fr grid-flow-col gap-1 rounded-field bg-soft p-1"
+            // Phones: up to 3 per row, so 5 body types wrap to two readable rows; one row from tablet up.
+            className="flex flex-wrap gap-1 rounded-field bg-soft p-1 sm:flex-nowrap"
           >
             {summaries.map(({ type }) => {
               const active = type === current.type;
@@ -194,7 +199,7 @@ export function BodyTypeShowroom({ summaries }: { summaries: BodyTypeSummary[] }
                   aria-pressed={active}
                   disabled={!hydrated}
                   onClick={() => setSelected(type)}
-                  className={`min-h-11 rounded-[4px] px-2 text-sm font-semibold transition-colors ${
+                  className={`min-h-11 flex-[1_1_30%] rounded-[4px] px-2 text-sm font-semibold whitespace-nowrap transition-colors sm:flex-1 ${
                     active ? "bg-paper text-ink shadow-[0_1px_3px_rgb(14_26_43/0.15)]" : "text-muted hover:text-ink"
                   }`}
                 >
