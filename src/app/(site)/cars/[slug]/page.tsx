@@ -56,8 +56,9 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
   const similar = similarCars(car, cars);
   const sold = car.status === "sold";
 
-  // Details the listing doesn't state link to the form with the question already written.
-  const ask = (topic: AskTopic) => `/test-drive?car=${car.slug}&ask=${topic}`;
+  // Details the listing doesn't state link to the question form with the question already
+  // written. Not the test-drive form: asking the mileage shouldn't need a date and time.
+  const ask = (topic: AskTopic) => `/branches?car=${car.slug}&ask=${topic}#ask`;
   const specs: [label: string, value: string | null, topic?: AskTopic][] = [
     ["Year", String(car.year)],
     ["Mileage", car.mileage_km === null ? null : formatKm(car.mileage_km), "mileage"],
