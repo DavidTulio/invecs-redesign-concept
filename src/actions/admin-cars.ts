@@ -7,6 +7,7 @@ import { z } from "@/lib/zod";
 import { CAR_STATUSES, FEATURED_MAX, makeCarSchema, PHOTO_MAX_BYTES, sniffImageType, uuidSchema } from "@/lib/car-schema";
 import { CARS_TAG } from "@/lib/data/cars";
 import { requireAdmin } from "@/lib/server/auth";
+import { OFFICIAL_CONTACT, SITE_NAME } from "@/lib/site";
 import { carSlug } from "@/lib/slug";
 import { carTitle } from "@/lib/types";
 
@@ -148,7 +149,7 @@ export async function uploadPhoto(carId: string, formData: FormData): Promise<Up
   const type = sniffImageType(bytes);
   if (!type) return { ok: false, error: `${file.name} isn't a JPG, PNG or WebP image.` };
 
-  const { data: car } = await supabase.from("cars").select("slug, year, make, model").eq("id", id.data).single();
+  const { data: car } = await supabase.from("cars").select("slug, year, make, model, variant").eq("id", id.data).single();
   if (!car) return { ok: false, error: "Unknown car." };
 
   // A random file name: nothing from the visitor's file name reaches storage.
@@ -169,11 +170,16 @@ export async function uploadPhoto(carId: string, formData: FormData): Promise<Up
     .limit(1)
     .maybeSingle();
 
+  const position = (last?.position ?? -1) + 1;
   const { error: rowError } = await supabase.from("car_photos").insert({
     car_id: id.data,
     path,
-    position: (last?.position ?? -1) + 1,
-    alt: `Photo of the ${carTitle(car)}`,
+    position,
+    // Numbered, so a screen reader doesn't hear the same sentence for every photo.
+    alt: `${carTitle(car)} ${car.variant}`.trim() + `, photo ${position + 1}`,
+    // The dealer's own photos, shown with permission: the gallery credits them.
+    credit_name: SITE_NAME,
+    credit_url: OFFICIAL_CONTACT.facebook,
   });
   if (rowError) {
     await supabase.storage.from(BUCKET).remove([path]);
