@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { getAllCars } from "@/lib/data/cars";
-import { fieldErrors, makeInquirySchema, tradeInOf, type InquiryField } from "@/lib/inquiry";
+import { fieldErrors, makeInquirySchema, makeQuestionSchema, tradeInOf, type InquiryField } from "@/lib/inquiry";
 import { checkFormStamp, clientIp, hashIp } from "@/lib/server/form-guard";
 import { verifyTurnstile } from "@/lib/server/turnstile";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +18,8 @@ export type InquiryState = {
 };
 
 const FIELDS = [
+  "kind",
+  "topic",
   "car",
   "name",
   "phone",
@@ -37,7 +39,8 @@ const FIELDS = [
 const GENERIC_ERROR = "Something went wrong on our side. Please try again in a minute.";
 
 /**
- * Saves a test-drive request or inquiry. Every check runs on the server, because
+ * Saves a test-drive request, or a question from the contact form (kind=question).
+ * Every check runs on the server, because
  * anything in the browser (including hidden fields and disabled buttons) can be bypassed.
  * Order: cheapest checks first, so bots are turned away before we spend any work on them.
  */
@@ -67,12 +70,15 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
   if (stamp === "invalid") return fail("Please refresh the page and try again.");
 
   // 3. Validation: the same rules as the browser, enforced here for real.
-  const parsed = makeInquirySchema().safeParse(values);
+  const parsed =
+    values.kind === "question" ? makeQuestionSchema().safeParse(values) : makeInquirySchema().safeParse(values);
   if (!parsed.success) {
     return fail("Please check the highlighted fields.", fieldErrors(parsed.error));
   }
   const inquiry = parsed.data;
-  const tradeIn = tradeInOf(inquiry);
+  const testDrive = "preferred_date" in inquiry ? inquiry : null;
+  const question = "topic" in inquiry ? inquiry : null;
+  const tradeIn = testDrive && tradeInOf(testDrive);
 
   const requestHeaders = await headers();
   const ip = clientIp(requestHeaders);
@@ -99,8 +105,8 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
 
   // 6. The chosen car must exist and still be for sale.
   let carId: string | null = null;
-  if (inquiry.car) {
-    const car = (await getAllCars()).find((c) => c.slug === inquiry.car);
+  if (testDrive?.car) {
+    const car = (await getAllCars()).find((c) => c.slug === testDrive.car);
     if (!car || car.status === "sold") {
       return fail("That car is no longer available. Please choose another one.", {
         car: "This car is no longer available",
@@ -117,8 +123,10 @@ export async function submitInquiry(_previous: InquiryState, formData: FormData)
     phone: inquiry.phone ?? null,
     email: inquiry.email ?? null,
     contact_method: inquiry.contact_method,
-    preferred_date: inquiry.preferred_date,
-    preferred_time: inquiry.preferred_time,
+    // A question has a topic instead of a test-drive date and time.
+    topic: question?.topic ?? null,
+    preferred_date: testDrive?.preferred_date ?? null,
+    preferred_time: testDrive?.preferred_time ?? null,
     message: inquiry.message,
     // Saved only when "I have a car to trade in" was ticked.
     trade_in_make: tradeIn?.make ?? null,

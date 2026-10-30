@@ -19,7 +19,12 @@ export function DemoNotice({ children }: { children: React.ReactNode }) {
               {" · "}
             </span>
           ))}
-          <span className="whitespace-nowrap select-all">{OFFICIAL_CONTACT.emails[0]}</span>
+          {OFFICIAL_CONTACT.emails.map((email, index) => (
+            <span key={email}>
+              {index > 0 && " · "}
+              <span className="whitespace-nowrap select-all">{email}</span>
+            </span>
+          ))}
         </p>
       </div>
     </aside>

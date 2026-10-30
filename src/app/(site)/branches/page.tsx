@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { Clock, ExternalLink, MapPin } from "lucide-react";
+import { InquiryForm } from "@/components/forms/InquiryForm";
 import { ContactButtons } from "@/components/site/ContactButtons";
 import { DemoNotice } from "@/components/site/DemoNotice";
 import { getBranches } from "@/lib/data/branches";
+import { QUESTION_TOPICS } from "@/lib/inquiry";
+import { createFormStamp } from "@/lib/server/form-guard";
 
 export const metadata: Metadata = {
   title: "Branches & contact",
-  description: "Showroom address, opening hours, map, and ways to reach a person: call, Viber, Messenger or email.",
+  description: "Showroom address, opening hours, map, and ways to reach a person: call, Viber, Messenger, email or a question form.",
 };
 
-export default async function BranchesPage() {
+export default async function BranchesPage({ searchParams }: PageProps<"/branches">) {
   const branches = await getBranches();
 
   return (
@@ -21,7 +26,7 @@ export default async function BranchesPage() {
       </p>
 
       <div className="mt-6 max-w-3xl">
-        <DemoNotice>Demo: the contact buttons below are switched off in this concept.</DemoNotice>
+        <DemoNotice>Demo: the contact buttons and the question form below don&apos;t reach INVECS Autocentrum.</DemoNotice>
       </div>
 
       <ul className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -56,10 +61,7 @@ export default async function BranchesPage() {
                   <Clock aria-hidden size={20} className="text-signal" />
                   <span className="sr-only">Opening hours</span>
                 </dt>
-                <dd>
-                  {branch.hours}
-                  <span className="block text-xs text-muted">Sample hours for this concept.</span>
-                </dd>
+                <dd>{branch.hours}</dd>
               </div>
             </dl>
 
@@ -81,6 +83,35 @@ export default async function BranchesPage() {
           </Link>
         </li>
       </ul>
+
+      <section id="ask" aria-labelledby="ask-title" className="mt-12 max-w-2xl scroll-mt-24">
+        <h2 id="ask-title" className="font-wide text-2xl font-bold">
+          Send us a question
+        </h2>
+        <p className="mt-2 text-muted">About a car, a service or financing. We&apos;ll reply by your chosen contact method.</p>
+        <div className="mt-6">
+          <Suspense fallback={<div className="h-[32rem] rounded-card bg-soft" aria-hidden />}>
+            <QuestionForm searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </section>
     </div>
+  );
+}
+
+async function QuestionForm({ searchParams }: Pick<PageProps<"/branches">, "searchParams">) {
+  const { topic } = await searchParams;
+  // Rendered per request: the anti-bot time stamp must be fresh.
+  await connection();
+  const now = new Date();
+
+  return (
+    <InquiryForm
+      kind="question"
+      // From "Ask about a service" on the Services page: that topic is already chosen.
+      defaultTopic={QUESTION_TOPICS.find((t) => t === topic)}
+      formStamp={createFormStamp(now.getTime())}
+      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+    />
   );
 }

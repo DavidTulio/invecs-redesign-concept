@@ -37,7 +37,25 @@ export function askMessage(topic: AskTopic, car: string) {
 /** Private staff notes on an inquiry (admin only). */
 export const STAFF_NOTES_MAX = 1000;
 
-/** Test-drive start times: hourly within showroom hours (8 AM–6 PM), so every drive ends before closing. */
+/**
+ * Questions from the contact form (Branches & contact): no car, date or time needed.
+ * "Ask about a service" opens the form with ?topic=service already chosen.
+ */
+export const QUESTION_TOPICS = ["car", "service", "financing", "other"] as const;
+export type QuestionTopic = (typeof QUESTION_TOPICS)[number];
+export const QUESTION_TOPIC_LABELS: Record<QuestionTopic, string> = {
+  car: "A car",
+  service: "A service",
+  financing: "Financing",
+  other: "Something else",
+};
+
+/** What the admin inbox shows when no car was chosen: "Question about a service", or "General question". */
+export function questionLabel(topic: QuestionTopic | null) {
+  return topic ? `Question about ${QUESTION_TOPIC_LABELS[topic].toLowerCase()}` : "General question";
+}
+
+/** Test-drive start times: hourly within showroom hours (8 AM–5 PM), so every drive ends before closing. */
 export const TEST_DRIVE_TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"] as const;
 
 /** "13:00" → "1:00 PM" */
@@ -50,6 +68,11 @@ export function formatTimeSlot(time: string) {
 export function manilaDate(date: Date, addDays = 0) {
   const shifted = new Date(date.getTime() + addDays * 86_400_000);
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila" }).format(shifted);
+}
+
+/** The showroom is closed on Sundays, so no test drives then. Takes YYYY-MM-DD. */
+export function isSunday(date: string) {
+  return new Date(`${date}T00:00:00Z`).getUTCDay() === 0;
 }
 
 /** "0917 510 3858", "+63 917-510-3858" or "639175103858" → "+639175103858". Otherwise null. */
@@ -82,6 +105,76 @@ export function tradeInOf(inquiry: InquiryInput) {
   };
 }
 
+/** Name and how to reach the visitor: the same rules for test drives and questions. */
+function contactFields() {
+  return {
+    name: z
+      .string({ error: "Enter your name" })
+      .trim()
+      .min(2, "Enter your name")
+      .max(80, "Keep your name under 80 characters")
+      .refine(noLinks, "Please enter your name without web links"),
+    phone: z.preprocess(
+      emptyToUndefined,
+      z
+        .string()
+        .max(30)
+        .transform((value, ctx) => {
+          const phone = normalizePhilippineMobile(value);
+          if (!phone) {
+            ctx.addIssue({ code: "custom", message: "Enter a PH mobile number, like 0917 123 4567" });
+            return z.NEVER;
+          }
+          return phone;
+        })
+        .optional(),
+    ),
+    email: z.preprocess(
+      emptyToUndefined,
+      z.email("Enter a valid email address").max(254).toLowerCase().optional(),
+    ),
+    contact_method: z.enum(CONTACT_METHODS, { error: "Choose how we should contact you" }),
+    message: z
+      .string()
+      .trim()
+      .max(MESSAGE_MAX, `Keep your message under ${MESSAGE_MAX} characters`)
+      .refine((text) => countLinks(text) <= 2, "Please remove the links from your message")
+      .default(""),
+  };
+}
+
+type Reachable = { contact_method: ContactMethod; phone?: string; email?: string };
+
+/** Ask for the detail that matches the chosen contact method. */
+function requireContactDetail(data: Reachable, ctx: z.RefinementCtx<Reachable>) {
+  if ((data.contact_method === "call" || data.contact_method === "viber") && !data.phone) {
+    ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter your mobile number so we can reach you" });
+  }
+  if (data.contact_method === "email" && !data.email) {
+    ctx.addIssue({ code: "custom", path: ["email"], message: "Enter your email address" });
+  }
+  if (data.contact_method === "messenger" && !data.phone && !data.email) {
+    ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter a mobile number or email so we can find you" });
+  }
+}
+
+// These checks compare fields with each other. By default Zod skips them while any field
+// has a mistake; `when` runs them as long as their own fields are valid, so the visitor
+// sees every problem in one round instead of fixing the form twice.
+const contactDetailValid = { when: fieldsValid((field) => ["contact_method", "phone", "email"].includes(field)) };
+
+/** A general question from the contact form. Unlike a test drive, the message is the point, so it's required. */
+export function makeQuestionSchema() {
+  const contact = contactFields();
+  return z
+    .object({
+      ...contact,
+      topic: z.enum(QUESTION_TOPICS, { error: "Choose what your question is about" }),
+      message: contact.message.refine((text) => text.length > 0, "Type your question"),
+    })
+    .superRefine(requireContactDetail, contactDetailValid);
+}
+
 export function makeInquirySchema(now = new Date()) {
   const firstDay = manilaDate(now, 1); // test drives start tomorrow at the earliest
   const lastDay = manilaDate(now, BOOKING_WINDOW_DAYS);
@@ -93,46 +186,16 @@ export function makeInquirySchema(now = new Date()) {
         emptyToUndefined,
         z.string().max(120).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Choose a car from the list").optional(),
       ),
-      name: z
-        .string({ error: "Enter your name" })
-        .trim()
-        .min(2, "Enter your name")
-        .max(80, "Keep your name under 80 characters")
-        .refine(noLinks, "Please enter your name without web links"),
-      phone: z.preprocess(
-        emptyToUndefined,
-        z
-          .string()
-          .max(30)
-          .transform((value, ctx) => {
-            const phone = normalizePhilippineMobile(value);
-            if (!phone) {
-              ctx.addIssue({ code: "custom", message: "Enter a PH mobile number, like 0917 123 4567" });
-              return z.NEVER;
-            }
-            return phone;
-          })
-          .optional(),
-      ),
-      email: z.preprocess(
-        emptyToUndefined,
-        z.email("Enter a valid email address").max(254).toLowerCase().optional(),
-      ),
-      contact_method: z.enum(CONTACT_METHODS, { error: "Choose how we should contact you" }),
+      ...contactFields(),
       preferred_date: z.preprocess(
         emptyToUndefined,
         z
           .string({ error: "Choose a test-drive date" })
           .regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a test-drive date")
-          .refine((d) => d >= firstDay && d <= lastDay, `Choose a date from tomorrow up to ${BOOKING_WINDOW_DAYS} days ahead`),
+          .refine((d) => d >= firstDay && d <= lastDay, `Choose a date from tomorrow up to ${BOOKING_WINDOW_DAYS} days ahead`)
+          .refine((d) => !isSunday(d), "We're closed on Sundays. Please choose Monday to Saturday"),
       ),
       preferred_time: z.enum(TEST_DRIVE_TIMES, { error: "Choose a test-drive time" }),
-      message: z
-        .string()
-        .trim()
-        .max(MESSAGE_MAX, `Keep your message under ${MESSAGE_MAX} characters`)
-        .refine((text) => countLinks(text) <= 2, "Please remove the links from your message")
-        .default(""),
       trade_in: z.preprocess((value) => value === "yes", z.boolean()),
       trade_in_make: z.preprocess(
         emptyToUndefined,
@@ -170,24 +233,7 @@ export function makeInquirySchema(now = new Date()) {
           .optional(),
       ),
     })
-    // These checks compare fields with each other. By default Zod skips them while any field
-    // has a mistake; `when` runs them as long as their own fields are valid, so the visitor
-    // sees every problem in one round instead of fixing the form twice.
-    .superRefine(
-      (data, ctx) => {
-        // Ask for the detail that matches the chosen contact method.
-        if ((data.contact_method === "call" || data.contact_method === "viber") && !data.phone) {
-          ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter your mobile number so we can reach you" });
-        }
-        if (data.contact_method === "email" && !data.email) {
-          ctx.addIssue({ code: "custom", path: ["email"], message: "Enter your email address" });
-        }
-        if (data.contact_method === "messenger" && !data.phone && !data.email) {
-          ctx.addIssue({ code: "custom", path: ["phone"], message: "Enter a mobile number or email so we can find you" });
-        }
-      },
-      { when: fieldsValid((field) => ["contact_method", "phone", "email"].includes(field)) },
-    )
+    .superRefine(requireContactDetail, contactDetailValid)
     .superRefine(
       (data, ctx) => {
         // The trade-in fields only count when the box is ticked; then make, model and year are needed.
@@ -207,7 +253,8 @@ function fieldsValid(matches: (field: string) => boolean) {
 }
 
 export type InquiryInput = z.infer<ReturnType<typeof makeInquirySchema>>;
-export type InquiryField = keyof InquiryInput;
+export type QuestionInput = z.infer<ReturnType<typeof makeQuestionSchema>>;
+export type InquiryField = keyof InquiryInput | keyof QuestionInput;
 
 /** Field name → first error message, for showing next to each input. */
 export function fieldErrors(error: z.ZodError): Partial<Record<InquiryField, string>> {
