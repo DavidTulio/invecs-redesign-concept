@@ -18,13 +18,19 @@ declare global {
  * Cloudflare Turnstile: a privacy-friendly "I'm human" check. Most visitors pass
  * without clicking anything. It adds a hidden `cf-turnstile-response` field to the
  * surrounding form; the server sends that token to Cloudflare to verify it.
+ *
+ * Nothing loads until `load` is true (the visitor started filling in the form): the
+ * check downloads about 800 KB, and most visitors to these pages never send anything.
+ * The empty box keeps its height, so nothing jumps when it appears.
  */
 export function Turnstile({
   siteKey,
   action,
+  load,
   onTokenChange,
 }: {
   siteKey: string;
+  load: boolean;
   action: string;
   onTokenChange: (token: string | null) => void;
 }) {
@@ -37,7 +43,7 @@ export function Turnstile({
   });
 
   useEffect(() => {
-    if (!ready || !container.current || !window.turnstile) return;
+    if (!load || !ready || !container.current || !window.turnstile) return;
     const widgetId = window.turnstile.render(container.current, {
       sitekey: siteKey,
       action,
@@ -49,15 +55,17 @@ export function Turnstile({
       "error-callback": () => onTokenRef.current(null),
     });
     return () => window.turnstile?.remove(widgetId);
-  }, [ready, siteKey, action]);
+  }, [load, ready, siteKey, action]);
 
   return (
     <>
-      <Script
-        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        strategy="afterInteractive"
-        onReady={() => setReady(true)}
-      />
+      {load && (
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+          strategy="afterInteractive"
+          onReady={() => setReady(true)}
+        />
+      )}
       <div ref={container} className="min-h-[65px]" />
     </>
   );

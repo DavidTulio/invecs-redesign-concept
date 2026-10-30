@@ -48,7 +48,7 @@ const subscribeMotion = (onChange: () => void) => {
 
 /**
  * "Shop by body type" as a showroom turntable. The still picture shows first;
- * the 3D viewer (~250 KB) only downloads when the section comes near, and on
+ * the 3D viewer (~250 KB) only downloads once the section is on screen, and on
  * Data Saver or 2G it waits for a tap. Only the selected car's model loads.
  */
 export function BodyTypeShowroom({ summaries }: { summaries: BodyTypeSummary[] }) {
@@ -87,7 +87,9 @@ export function BodyTypeShowroom({ summaries }: { summaries: BodyTypeSummary[] }
         if (document.readyState === "complete") whenIdle();
         else window.addEventListener("load", whenIdle, { once: true });
       },
-      { rootMargin: "300px" },
+      // Only once the showroom is actually on screen (a third of it): on phones it sits just
+      // below the hero, so loading "nearly visible" started the 3D while visitors read the top.
+      { threshold: 0.3 },
     );
     observer.observe(stage);
     return () => observer.disconnect();

@@ -67,7 +67,7 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
             />
           </div>
           {priceError && (
-            <p id={`${id}-price-error`} className="text-sm font-medium text-signal">
+            <p id={`${id}-price-error`} className="text-sm font-semibold text-signal">
               {priceError}
             </p>
           )}
@@ -165,7 +165,7 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
               %
             </span>
           </div>
-          <p id={`${id}-rate-hint`} className={`text-xs ${rateError ? "font-medium text-signal" : "text-muted"}`}>
+          <p id={`${id}-rate-hint`} className={`text-xs ${rateError ? "font-semibold text-signal" : "text-muted"}`}>
             {rateError ??
               (rateType === "addon"
                 ? `Same as ${formatRate(addOnRateForTerm(Number(rateText), termMonths))}% for ${termMonths} months, the way bank rate sheets often list it. A sample rate; your bank quotes its own.`
