@@ -7,7 +7,9 @@ import { InquiryForm } from "@/components/forms/InquiryForm";
 import { ContactButtons } from "@/components/site/ContactButtons";
 import { DemoNotice } from "@/components/site/DemoNotice";
 import { getBranches } from "@/lib/data/branches";
-import { QUESTION_TOPICS } from "@/lib/inquiry";
+import { getAllCars } from "@/lib/data/cars";
+import { ASK_TOPICS, askMessage, QUESTION_TOPICS } from "@/lib/inquiry";
+import { carTitle } from "@/lib/types";
 import { createFormStamp } from "@/lib/server/form-guard";
 
 export const metadata: Metadata = {
@@ -100,16 +102,23 @@ export default async function BranchesPage({ searchParams }: PageProps<"/branche
 }
 
 async function QuestionForm({ searchParams }: Pick<PageProps<"/branches">, "searchParams">) {
-  const { topic } = await searchParams;
+  const { topic, car, ask } = await searchParams;
   // Rendered per request: the anti-bot time stamp must be fresh.
   await connection();
   const now = new Date();
+
+  // From "Ask for more details" on a car page (?car=…&ask=mileage): a question about that
+  // car, already written, so the buyer only adds how to reach them.
+  const askTopic = ASK_TOPICS.find((t) => t === ask);
+  const askedCar = askTopic && typeof car === "string" ? (await getAllCars()).find((c) => c.slug === car) : undefined;
+  const defaultMessage = askTopic && askedCar ? askMessage(askTopic, `${carTitle(askedCar)} ${askedCar.variant}`.trim()) : undefined;
 
   return (
     <InquiryForm
       kind="question"
       // From "Ask about a service" on the Services page: that topic is already chosen.
-      defaultTopic={QUESTION_TOPICS.find((t) => t === topic)}
+      defaultTopic={askedCar ? "car" : QUESTION_TOPICS.find((t) => t === topic)}
+      defaultMessage={defaultMessage}
       formStamp={createFormStamp(now.getTime())}
       siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
     />

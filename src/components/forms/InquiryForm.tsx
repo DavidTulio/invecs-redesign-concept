@@ -162,7 +162,7 @@ export function InquiryForm({
             defaultValue={values.car ?? defaultCar ?? ""}
             className={inputClass}
           >
-            <option value="">No specific car / general question</option>
+            <option value="">No specific car yet</option>
             {cars.map((car) => (
               <option key={car.slug} value={car.slug}>
                 {car.label} · {formatPeso(car.price)}

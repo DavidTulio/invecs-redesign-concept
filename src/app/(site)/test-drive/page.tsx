@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { InquiryForm, type CarOption } from "@/components/forms/InquiryForm";
@@ -11,7 +12,7 @@ import { carTitle } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Book a test drive",
-  description: "Request a test drive or ask about a car. Choose a date and how you'd like to be contacted.",
+  description: "Request a test drive. Choose a car, a date and time, and how you'd like to be contacted.",
 };
 
 export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">) {
@@ -21,7 +22,11 @@ export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">
         <h1 className="font-wide text-3xl font-extrabold sm:text-4xl">Book a test drive</h1>
         <p className="mt-3 max-w-[60ch] text-[17px] leading-relaxed text-muted">
           Pick a car, a date and a time that suit you. We&apos;ll confirm by your chosen contact method.
-          You can also use this form for questions about a car, trade-ins or financing.
+          Only have a question?{" "}
+          <Link href="/branches#ask" className="font-semibold text-signal hover:underline">
+            Ask it here
+          </Link>
+          , no date needed.
         </p>
 
         <div className="mt-6">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, MessageCircleQuestion } from "lucide-react";
 import { formatPeso } from "@/lib/format";
 import {
   addOnRateForTerm,
@@ -207,11 +207,12 @@ export function LoanCalculator({ initialPrice, car }: { initialPrice: number; ca
           down payment, so your actual payment may differ.
         </p>
 
+        {/* With a car: book it. Without one: a financing question, which needs no test-drive date. */}
         <Link
-          href={car ? `/test-drive?car=${car.slug}` : "/test-drive"}
+          href={car ? `/test-drive?car=${car.slug}` : "/branches?topic=financing#ask"}
           className="mt-4 flex items-center justify-center gap-2 rounded-field bg-signal px-4 py-3 font-semibold text-white hover:bg-signal-dark"
         >
-          <CalendarCheck aria-hidden size={18} />
+          {car ? <CalendarCheck aria-hidden size={18} /> : <MessageCircleQuestion aria-hidden size={18} />}
           {car ? "Book a test drive of this car" : "Ask us about financing"}
         </Link>
       </section>
