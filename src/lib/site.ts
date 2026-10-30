@@ -7,6 +7,7 @@ export const SITE_NAME = "INVECS Autocentrum";
 
 export const NAV_LINKS = [
   { href: "/inventory", label: "Inventory" },
+  { href: "/services", label: "Services" },
   { href: "/loan-calculator", label: "Loan calculator" },
   { href: "/branches", label: "Branches & contact" },
 ] as const;

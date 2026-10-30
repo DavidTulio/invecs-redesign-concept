@@ -1,4 +1,5 @@
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Check } from "lucide-react";
 
 // The worries Filipino used-car buyers actually have (papers, flood damage, hidden loans,
 // stolen cars), answered as a pre-listing inspection sheet instead of generic icons.
@@ -29,6 +30,13 @@ export function WhyBuyHere() {
           <p className="mt-3 max-w-[46ch] text-[16px] leading-relaxed text-muted">
             Then see every feature on the car&apos;s page, and ask us anything by call, Viber,
             Messenger or email.
+          </p>
+          <p className="mt-5 max-w-[46ch] text-[15px] leading-relaxed text-ink-2">
+            We also handle financing, trade-ins, insurance and LTO registration, PMS and detailing.{" "}
+            <Link href="/services" className="inline-flex items-center gap-1 font-semibold text-signal hover:underline">
+              See all services
+              <ArrowRight aria-hidden size={15} />
+            </Link>
           </p>
         </div>
 

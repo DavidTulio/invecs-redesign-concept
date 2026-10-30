@@ -27,6 +27,7 @@ export function InquiryForm({
   cars,
   defaultCar,
   defaultMessage,
+  defaultTradeIn = false,
   formStamp,
   minDate,
   maxDate,
@@ -36,6 +37,8 @@ export function InquiryForm({
   defaultCar?: string;
   /** A question already written for the buyer (from "Ask for more details"). */
   defaultMessage?: string;
+  /** Start with "I have a car to trade in" ticked. */
+  defaultTradeIn?: boolean;
   formStamp: string;
   minDate: string;
   maxDate: string;
@@ -53,7 +56,7 @@ export function InquiryForm({
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const [method, setMethod] = useState<ContactMethod>((values.contact_method as ContactMethod) || "call");
   const [messageLength, setMessageLength] = useState((values.message ?? defaultMessage ?? "").length);
-  const [tradeIn, setTradeIn] = useState(values.trade_in === "yes");
+  const [tradeIn, setTradeIn] = useState(state.status === "error" ? values.trade_in === "yes" : defaultTradeIn);
 
   const errors = clientErrors ?? (state.status === "error" ? state.errors : undefined) ?? {};
   const serverMessage = state.status === "error" ? state.message : undefined;

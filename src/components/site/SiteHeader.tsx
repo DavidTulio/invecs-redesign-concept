@@ -10,7 +10,7 @@ export function SiteHeader() {
       <div className="container-site flex h-16 items-center justify-between gap-4">
         <Wordmark />
 
-        <nav aria-label="Main" className="hidden md:block">
+        <nav aria-label="Main" className="hidden lg:block">
           <ul className="flex items-center gap-7 text-[15px] text-ink-2">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
