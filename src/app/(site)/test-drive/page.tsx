@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { InquiryForm, type CarOption } from "@/components/forms/InquiryForm";
 import { DemoNotice } from "@/components/site/DemoNotice";
 import { getAllCars } from "@/lib/data/cars";
-import { BOOKING_WINDOW_DAYS, manilaDate } from "@/lib/inquiry";
+import { ASK_TOPICS, askMessage, BOOKING_WINDOW_DAYS, manilaDate } from "@/lib/inquiry";
 import { inStock } from "@/lib/inventory";
 import { createFormStamp } from "@/lib/server/form-guard";
 import { carTitle } from "@/lib/types";
@@ -62,7 +62,7 @@ export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">
 }
 
 async function TestDriveForm({ searchParams }: Pick<PageProps<"/test-drive">, "searchParams">) {
-  const { car } = await searchParams;
+  const { car, ask } = await searchParams;
   // Rendered per request: the anti-bot time stamp and "tomorrow" must be fresh.
   await connection();
   const now = new Date();
@@ -78,11 +78,16 @@ async function TestDriveForm({ searchParams }: Pick<PageProps<"/test-drive">, "s
 
   const requested = typeof car === "string" ? car : undefined;
   const defaultCar = cars.some((c) => c.slug === requested) ? requested : undefined;
+  // Coming from "Ask for more details" on a car page: start the message for them.
+  const topic = ASK_TOPICS.find((t) => t === ask);
+  const carLabel = cars.find((c) => c.slug === defaultCar)?.label;
+  const defaultMessage = topic && carLabel ? askMessage(topic, carLabel) : undefined;
 
   return (
     <InquiryForm
       cars={cars}
       defaultCar={defaultCar}
+      defaultMessage={defaultMessage}
       formStamp={createFormStamp(now.getTime())}
       minDate={manilaDate(now, 1)}
       maxDate={manilaDate(now, BOOKING_WINDOW_DAYS)}

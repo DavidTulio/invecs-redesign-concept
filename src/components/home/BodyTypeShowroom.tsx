@@ -20,8 +20,14 @@ const MODELS: Partial<Record<BodyType, { src: string; poster: StaticImageData }>
   sedan: { src: "/models/sedan.glb", poster: sedanPoster },
 };
 
-const PLURAL: Record<BodyType, string> = { suv: "SUVs and AUVs", pickup: "pickups", sedan: "sedans", van: "vans" };
-const ARTICLE: Record<BodyType, string> = { suv: "an SUV", pickup: "a pickup", sedan: "a sedan", van: "a van" };
+const PLURAL: Record<BodyType, string> = {
+  suv: "SUVs and AUVs",
+  pickup: "pickups",
+  sedan: "sedans",
+  hatchback: "hatchbacks",
+  van: "vans",
+};
+const ARTICLE: Record<BodyType, string> = { suv: "an SUV", pickup: "a pickup", sedan: "a sedan", hatchback: "a hatchback", van: "a van" };
 
 const MODEL_CREDIT = "https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5";
 

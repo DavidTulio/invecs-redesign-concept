@@ -13,11 +13,14 @@ export function CarImage({
   bodyType,
   sizes,
   preload = false,
+  fit = "cover",
 }: {
   photo: CarPhoto | undefined;
   bodyType: BodyType;
   sizes: string;
   preload?: boolean;
+  /** "contain" shows the whole image (posters, full view); "cover" fills the frame. */
+  fit?: "cover" | "contain";
 }) {
   if (!photo) {
     return (
@@ -35,7 +38,7 @@ export function CarImage({
       fill
       sizes={sizes}
       preload={preload}
-      className="object-cover"
+      className={fit === "contain" ? "object-contain" : "object-cover"}
     />
   );
 }

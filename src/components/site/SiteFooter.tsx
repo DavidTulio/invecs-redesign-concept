@@ -90,15 +90,16 @@ export async function SiteFooter() {
         <div>
           <h2 className={heading}>About this site</h2>
           <p className="text-sm leading-relaxed">
-            A portfolio concept by David Tulio. Cars and prices are sample data. Photos are
-            free-licence images, credited in the project README.
+            A concept website by David Tulio, shown with permission of INVECS Autocentrum.
+            Listings and photos come from INVECS&apos;s Facebook page and may be out of date, so
+            please confirm details with INVECS.
           </p>
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="container-site flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-4 text-xs text-[#9aa5b5]">
-          <p>© {year} David Tulio · Unofficial redesign concept. Not affiliated with INVECS Autocentrum.</p>
+          <p>© {year} David Tulio · Concept website, not the official INVECS Autocentrum site.</p>
           <a href={OFFICIAL_SITE_URL} className="py-1 text-white underline underline-offset-2" rel="noopener">
             Official INVECS site
           </a>

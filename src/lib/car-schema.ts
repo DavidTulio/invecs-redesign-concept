@@ -31,7 +31,8 @@ export function makeCarSchema(now = new Date()) {
     body_type: z.enum(BODY_TYPES, { error: "Choose a body type" }),
     transmission: z.enum(TRANSMISSIONS, { error: "Choose a transmission" }),
     fuel: z.enum(FUELS, { error: "Choose a fuel type" }),
-    mileage_km: wholeNumber("mileage", 0, 2_000_000),
+    // Optional: some listings don't state it, and the site then shows "Ask us".
+    mileage_km: z.preprocess((value) => (value === "" ? null : value), wholeNumber("mileage", 0, 2_000_000).nullable()),
     price_php: wholeNumber("price", 10_000, 100_000_000),
     color: z.string().trim().max(40).default(""),
     description: z.string().trim().max(4000, "Keep the description under 4,000 characters").default(""),

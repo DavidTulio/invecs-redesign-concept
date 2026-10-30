@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s · INVECS Autocentrum (redesign concept)",
   },
   description:
-    "Unofficial portfolio redesign concept of INVECS Autocentrum's used-car website by David Tulio. Not affiliated with INVECS Autocentrum.",
+    "Concept website for INVECS Autocentrum by David Tulio, shown with permission. Not the official INVECS Autocentrum website.",
   openGraph: { siteName: "INVECS Autocentrum (redesign concept)", locale: "en_PH", type: "website" },
   // Concept safeguard: keep every page out of search engines.
   robots: {

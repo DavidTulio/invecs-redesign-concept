@@ -6,7 +6,7 @@ import { ImageOff, Plus, Star } from "lucide-react";
 import { CarStatusSelect } from "@/components/admin/CarStatusSelect";
 import { PageSkeleton } from "@/components/admin/PageSkeleton";
 import { CAR_STATUSES } from "@/lib/car-schema";
-import { formatKm, formatPeso } from "@/lib/format";
+import { formatPeso, mileageLabel } from "@/lib/format";
 import { requireAdmin } from "@/lib/server/auth";
 import { carPhotoUrl } from "@/lib/supabase/public";
 import { carTitle } from "@/lib/types";
@@ -21,7 +21,7 @@ type Row = {
   model: string;
   variant: string;
   price_php: number;
-  mileage_km: number;
+  mileage_km: number | null;
   status: string;
   featured: boolean;
   car_photos: { path: string; position: number }[];
@@ -133,7 +133,7 @@ async function AdminCarsContent({ searchParams }: PageProps<"/admin/cars">) {
                     </span>
                   )}
                   <p className="truncate text-sm text-muted">
-                    {car.variant} · {formatKm(car.mileage_km)} · {car.car_photos.length}{" "}
+                    {car.variant} · {mileageLabel(car.mileage_km)} · {car.car_photos.length}{" "}
                     {car.car_photos.length === 1 ? "photo" : "photos"}
                   </p>
                 </div>

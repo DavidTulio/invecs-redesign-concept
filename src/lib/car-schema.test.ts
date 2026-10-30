@@ -61,3 +61,16 @@ describe("sniffImageType", () => {
     expect(sniffImageType(bytes(...text("GIF89a")))).toBeNull();
   });
 });
+
+describe("optional mileage", () => {
+  const base = {
+    make: "Toyota", model: "Vios", variant: "", year: "2015", body_type: "sedan", transmission: "manual",
+    fuel: "gasoline", price_php: "260,000", color: "", description: "", features: "", status: "available", featured: "",
+  };
+  it("accepts an empty mileage as unknown", () => {
+    expect(makeCarSchema().parse({ ...base, mileage_km: "" }).mileage_km).toBeNull();
+  });
+  it("still reads a typed mileage", () => {
+    expect(makeCarSchema().parse({ ...base, mileage_km: "77,300" }).mileage_km).toBe(77_300);
+  });
+});

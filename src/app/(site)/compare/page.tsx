@@ -10,7 +10,7 @@ import { getAllCars } from "@/lib/data/cars";
 import { allSame, bestByRow, COMPARE_MAX, compareHref, featureUnion, parseCompareParam } from "@/lib/compare";
 import { formatKm, formatPeso } from "@/lib/format";
 import { estimateMonthly, LOAN_DEFAULTS } from "@/lib/loan";
-import { BODY_TYPE_LABELS, carTitle, FUEL_LABELS, TRANSMISSION_LABELS, type Car } from "@/lib/types";
+import { BODY_TYPE_LABELS, cardPhoto, carTitle, FUEL_LABELS, TRANSMISSION_LABELS, type Car } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Compare cars",
@@ -100,7 +100,7 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
             <ShareButton
               path={compareHref(ids)}
               title="Car comparison"
-              text={`Comparing ${cars.map((car) => carTitle(car)).join(" vs ")} (sample listings, redesign concept)`}
+              text={`Comparing ${cars.map((car) => carTitle(car)).join(" vs ")} (INVECS Autocentrum listings, concept website)`}
               label="Share this comparison"
               className="min-h-11 rounded-field border border-line px-3 text-sm hover:border-ink"
             />
@@ -118,7 +118,7 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
                 {cars.map((car) => (
                   <th key={car.slug} scope="col" className="border-b border-l border-line p-3 text-left align-top font-normal">
                     <div className="relative aspect-[16/10] overflow-hidden rounded-field bg-soft">
-                      <CarImage photo={car.photos[0]} bodyType={car.body_type} sizes="(min-width: 1024px) 320px, 45vw" />
+                      <CarImage photo={cardPhoto(car)} bodyType={car.body_type} sizes="(min-width: 1024px) 320px, 45vw" />
                     </div>
                     {car.status !== "available" && <StatusBadge status={car.status} className="mt-2" />}
                     <Link href={`/cars/${car.slug}`} className="font-wide mt-2 block leading-tight font-bold hover:underline">
@@ -139,7 +139,7 @@ async function Comparison({ searchParams }: Pick<PageProps<"/compare">, "searchP
                 "Lowest",
               )}
               {spec("Year", cars.map((car) => String(car.year)), "year", "Newest")}
-              {spec("Mileage", cars.map((car) => formatKm(car.mileage_km)), "mileage", "Lowest")}
+              {spec("Mileage", cars.map((car) => (car.mileage_km === null ? "Ask us" : formatKm(car.mileage_km))), "mileage", "Lowest")}
               {spec("Transmission", cars.map((car) => TRANSMISSION_LABELS[car.transmission]))}
               {spec("Fuel", cars.map((car) => FUEL_LABELS[car.fuel]))}
               {spec("Body type", cars.map((car) => BODY_TYPE_LABELS[car.body_type]))}

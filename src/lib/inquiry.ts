@@ -21,6 +21,19 @@ export const TRADE_IN_OLDEST_YEAR = 1980;
 export const TRADE_IN_MAX_KM = 1_000_000;
 export const TRADE_IN_NOTES_MAX = 300;
 
+/**
+ * "Ask for more details" links on a car page (?ask=mileage) open the form with the
+ * question already written, so the buyer only has to add how to reach them.
+ */
+export const ASK_TOPICS = ["mileage", "colour", "details"] as const;
+export type AskTopic = (typeof ASK_TOPICS)[number];
+
+export function askMessage(topic: AskTopic, car: string) {
+  if (topic === "mileage") return `Hi! What is the mileage of the ${car}?`;
+  if (topic === "colour") return `Hi! What colour is the ${car}?`;
+  return `Hi! Could you send me more details about the ${car}, like the mileage, condition and service history?`;
+}
+
 /** Private staff notes on an inquiry (admin only). */
 export const STAFF_NOTES_MAX = 1000;
 

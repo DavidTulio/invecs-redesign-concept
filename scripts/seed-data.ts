@@ -16,7 +16,7 @@ export type SeedPhoto = {
   alt: string;
 };
 
-export type SeedCar = Omit<Car, "id" | "slug" | "created_at" | "photos" | "featured"> & {
+export type SeedCar = Omit<Car, "id" | "slug" | "created_at" | "photos" | "featured" | "card_photo" | "photo_price"> & {
   /** Days before the seed date, so "Latest arrivals" has a realistic order */
   listedDaysAgo: number;
   photos: SeedPhoto[];

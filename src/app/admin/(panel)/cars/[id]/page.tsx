@@ -88,7 +88,7 @@ async function EditCarContent({ params, searchParams }: PageProps<"/admin/cars/[
             body_type: car.body_type,
             transmission: car.transmission,
             fuel: car.fuel,
-            mileage_km: String(car.mileage_km),
+            mileage_km: car.mileage_km === null ? "" : String(car.mileage_km),
             price_php: String(car.price_php),
             color: car.color,
             description: car.description,

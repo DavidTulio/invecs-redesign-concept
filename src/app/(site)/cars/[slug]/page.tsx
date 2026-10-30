@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calculator, CalendarCheck, Check, ChevronLeft } from "lucide-react";
+import { ArrowRight, Calculator, CalendarCheck, Check, ChevronLeft } from "lucide-react";
 import { CarCard } from "@/components/cars/CarCard";
 import { Gallery } from "@/components/cars/Gallery";
 import { CompareButton } from "@/components/compare/CompareButton";
@@ -10,9 +10,10 @@ import { ShareButton } from "@/components/share/ShareButton";
 import { PriceTag, TearLine } from "@/components/cars/PriceTag";
 import { StatusBadge } from "@/components/cars/StatusBadge";
 import { getAllCars, getCarBySlug } from "@/lib/data/cars";
-import { formatKm, formatPeso } from "@/lib/format";
+import { formatKm, formatPeso, mileageLabel } from "@/lib/format";
 import { similarCars } from "@/lib/inventory";
 import { carPhotoUrl } from "@/lib/supabase/public";
+import type { AskTopic } from "@/lib/inquiry";
 import { LOAN_DEFAULTS } from "@/lib/loan";
 import { BODY_TYPE_LABELS, carTitle, FUEL_LABELS, TRANSMISSION_LABELS } from "@/lib/types";
 
@@ -29,7 +30,9 @@ export async function generateMetadata({ params }: PageProps<"/cars/[slug]">): P
   const car = await getCarBySlug((await params).slug);
   if (!car) return { title: "Car not found" };
   const title = `${carTitle(car)} ${car.variant}`;
-  const description = `${formatPeso(car.price_php)} · ${formatKm(car.mileage_km)} · ${car.description.slice(0, 120)}`;
+  const description = [formatPeso(car.price_php), mileageLabel(car.mileage_km), car.description.slice(0, 120)]
+    .filter(Boolean)
+    .join(" · ");
   const photo = car.photos[0];
   return {
     title,
@@ -37,7 +40,7 @@ export async function generateMetadata({ params }: PageProps<"/cars/[slug]">): P
     // What Messenger, Viber and others show as the link preview.
     openGraph: {
       title: `${title} · ${formatPeso(car.price_php)}`,
-      description: `Sample listing on an unofficial redesign concept. ${formatKm(car.mileage_km)}.`,
+      description: `Listing from INVECS Autocentrum, on a concept website shown with permission. ${mileageLabel(car.mileage_km)}.`,
       url: `/cars/${car.slug}`,
       images: photo ? [{ url: carPhotoUrl(photo.path), alt: photo.alt }] : undefined,
     },
@@ -53,14 +56,17 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
   const similar = similarCars(car, cars);
   const sold = car.status === "sold";
 
-  const specs = [
+  // Details the listing doesn't state link to the form with the question already written.
+  const ask = (topic: AskTopic) => `/test-drive?car=${car.slug}&ask=${topic}`;
+  const specs: [label: string, value: string | null, topic?: AskTopic][] = [
     ["Year", String(car.year)],
-    ["Mileage", formatKm(car.mileage_km)],
+    ["Mileage", car.mileage_km === null ? null : formatKm(car.mileage_km), "mileage"],
     ["Transmission", TRANSMISSION_LABELS[car.transmission]],
     ["Fuel", FUEL_LABELS[car.fuel]],
     ["Body type", BODY_TYPE_LABELS[car.body_type]],
-    ["Colour", car.color || "Ask us"],
+    ["Colour", car.color || null, "colour"],
   ];
+  const priceChanged = car.photo_price !== null && car.photo_price !== car.price_php;
 
   return (
     <div className="container-site py-6 sm:py-10">
@@ -89,6 +95,14 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
           <div className="mt-5 overflow-hidden rounded-card border border-line">
             <div className="p-5">
               <PriceTag price={car.price_php} size="large" showMonthly={!sold} />
+              {priceChanged && (
+                <p className="mt-2 text-sm font-semibold text-ok">
+                  Updated price.{" "}
+                  <span className="font-normal text-muted">
+                    The photos show an earlier price of {formatPeso(car.photo_price!)}.
+                  </span>
+                </p>
+              )}
             </div>
             <TearLine />
             <div className="p-5">
@@ -132,7 +146,7 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
                     <ShareButton
                       path={`/cars/${car.slug}`}
                       title={`${title} ${car.variant}`}
-                      text={`${title} ${car.variant} · ${formatPeso(car.price_php)} (sample listing, redesign concept)`}
+                      text={`${title} ${car.variant} · ${formatPeso(car.price_php)} (INVECS Autocentrum listing, concept website)`}
                       className="min-h-12 rounded-field border border-line px-2 hover:border-ink"
                     />
                   </div>
@@ -142,10 +156,19 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
           </div>
 
           <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-            {specs.map(([label, value]) => (
+            {specs.map(([label, value, topic]) => (
               <div key={label} className="border-b border-line pb-2">
                 <dt className="text-muted">{label}</dt>
-                <dd className="font-semibold tabular-nums">{value}</dd>
+                <dd className="font-semibold tabular-nums">
+                  {value ??
+                    (topic && !sold ? (
+                      <Link href={ask(topic)} className="text-signal underline underline-offset-2 hover:text-signal-dark">
+                        Ask us<span className="sr-only"> about the {label.toLowerCase()}</span>
+                      </Link>
+                    ) : (
+                      "Not stated"
+                    ))}
+                </dd>
               </div>
             ))}
           </dl>
@@ -157,7 +180,22 @@ export default async function CarPage({ params }: PageProps<"/cars/[slug]">) {
             <h2 id="about-title" className="font-wide text-xl font-bold">
               About this car
             </h2>
-            <p className="mt-3 max-w-[65ch] leading-relaxed text-ink-2">{car.description}</p>
+            {car.description && <p className="mt-3 max-w-[65ch] leading-relaxed text-ink-2">{car.description}</p>}
+            {/* Listings often leave things out; one clear way to ask instead of empty sections. */}
+            {!sold && (!car.description || car.features.length === 0 || car.mileage_km === null) && (
+              <div className="mt-4 flex max-w-[65ch] flex-wrap items-center justify-between gap-3 rounded-card bg-soft p-4">
+                <p className="text-ink-2">
+                  {car.description ? "Want to know more about this car?" : "The full details of this car aren't posted yet."}
+                </p>
+                <Link
+                  href={ask("details")}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-field bg-ink px-4 font-semibold text-white hover:bg-ink-2"
+                >
+                  Ask for more details
+                  <ArrowRight aria-hidden size={16} />
+                </Link>
+              </div>
+            )}
           </section>
 
           {car.features.length > 0 && (
