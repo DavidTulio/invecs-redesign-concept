@@ -26,7 +26,7 @@ export function MobileNav() {
   }, [open]);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         className="-mr-2 grid size-11 place-items-center rounded-field text-ink hover:bg-soft"

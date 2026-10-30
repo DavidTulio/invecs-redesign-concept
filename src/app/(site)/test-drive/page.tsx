@@ -62,7 +62,7 @@ export default function TestDrivePage({ searchParams }: PageProps<"/test-drive">
 }
 
 async function TestDriveForm({ searchParams }: Pick<PageProps<"/test-drive">, "searchParams">) {
-  const { car, ask } = await searchParams;
+  const { car, ask, tradein } = await searchParams;
   // Rendered per request: the anti-bot time stamp and "tomorrow" must be fresh.
   await connection();
   const now = new Date();
@@ -88,6 +88,8 @@ async function TestDriveForm({ searchParams }: Pick<PageProps<"/test-drive">, "s
       cars={cars}
       defaultCar={defaultCar}
       defaultMessage={defaultMessage}
+      // From "Trade in your car" on the Services page: open the trade-in section.
+      defaultTradeIn={tradein === "1"}
       formStamp={createFormStamp(now.getTime())}
       minDate={manilaDate(now, 1)}
       maxDate={manilaDate(now, BOOKING_WINDOW_DAYS)}
