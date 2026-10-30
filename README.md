@@ -55,7 +55,7 @@ Each layer was tested with real attack attempts (direct API calls, tampered requ
 
 - A banner on every page says this is not the official INVECS Autocentrum website, that it is shown with permission, and links to the official site.
 - Every page sends `noindex, nofollow` (meta tag and `X-Robots-Tag` header), and `robots.txt` disallows all crawlers except chat apps' link-preview robots (Messenger/Facebook, Viber, WhatsApp, Telegram). Those may read public pages, never `/admin`, so a shared car shows its photo, name and price; the preview itself says "redesign concept", and noindex keeps it out of search indexes.
-- The logo is a plain text wordmark; no logo or photos are copied from the dealer.
+- The INVECS Autocentrum logo is used with permission: the original white-and-red version on dark backgrounds, and a navy-and-red version on the white header.
 - Inquiry forms run in demo mode and don't reach the dealer.
 
 ## Listings and permission
