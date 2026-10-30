@@ -48,7 +48,8 @@ export function MobileNav() {
         className="absolute inset-x-0 top-full border-b border-line bg-paper shadow-[0_12px_24px_-12px_rgb(14_26_43/0.25)]"
       >
         <ul className="container-site grid py-2">
-          {NAV_LINKS.map((link) => (
+          {/* Phones only: some visitors don't know the logo goes home. The desktop bar keeps the logo alone. */}
+          {[{ href: "/", label: "Home" }, ...NAV_LINKS].map((link) => (
             <li key={link.href} className="border-b border-line">
               <Link href={link.href} className="block py-3.5 text-base text-ink">
                 {link.label}
