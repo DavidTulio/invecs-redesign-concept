@@ -11,9 +11,8 @@ import { bodyTypeSummaries, inStock, latestArrivals } from "@/lib/inventory";
 export default async function HomePage() {
   const available = inStock(await getAllCars()); // already newest first
   const latest = latestArrivals(available, 6, FEATURED_MAX); // featured cars first
-  // Send the search form only the four fields it needs, not every description and photo.
-  const searchCars = available.map(({ body_type, make, model, price_php }) => ({
-    body_type,
+  // Send the search form only the three fields it needs, not every description and photo.
+  const searchCars = available.map(({ make, model, price_php }) => ({
     make,
     model,
     price_php,
@@ -40,17 +39,17 @@ export default async function HomePage() {
 
         <div className="min-w-0">
           <p className="text-sm font-semibold text-muted tabular-nums">
-            {available.length} cars in stock · SUVs, pickups and sedans
+            {available.length} cars in stock · Trusted since 2002
           </p>
           <h1
             id="hero-title"
             className="font-wide mt-3 max-w-[18ch] text-[clamp(2.1rem,5vw,3.3rem)] leading-[1.02] font-extrabold tracking-[-0.01em]"
           >
-            Premium cars, <span className="text-signal">clear prices</span>, easy monthly terms.
+            Quality cars, <span className="text-signal">clear prices</span>, easy monthly terms.
           </h1>
           <p className="mt-4 max-w-[52ch] text-[17px] leading-relaxed text-muted">
-            Inspected used and nearly-new cars. See the full price and a monthly estimate on every
-            car, then book a test drive online.
+            Pre-owned and brand-new SUVs, pickups, sedans, hatchbacks and vans. See the full price
+            and a monthly estimate on every car, then book a test drive online.
           </p>
           <div className="mt-7">
             <HeroSearch cars={searchCars} />
