@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { X } from "lucide-react";
 import { CarCard } from "@/components/cars/CarCard";
 import { FilterNavProvider, ResultsRegion } from "@/components/inventory/FilterNav";
+import { BodyTypeChips } from "@/components/inventory/BodyTypeChips";
 import { FilterPanel } from "@/components/inventory/FilterPanel";
 import { SearchBox } from "@/components/inventory/SearchBox";
 import { SortSelect } from "@/components/inventory/SortSelect";
@@ -46,6 +47,8 @@ async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, 
   const results = applyFilters(cars, filters);
   const facets = getFacets(cars, filters);
   const chips = activeFilters(filters);
+  // Body type has its own row of chips, so it isn't repeated in the panel count or the "×" chips.
+  const otherChips = chips.filter((chip) => chip.key !== "body");
   const suggestions = results.length === 0 && filters.q ? searchSuggestions(cars, filters) : [];
 
   return (
@@ -53,9 +56,12 @@ async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, 
       <div className="mt-6 max-w-2xl">
         <SearchBox />
       </div>
+      <div className="mt-4">
+        <BodyTypeChips options={facets.body} />
+      </div>
       <div className="mt-5 grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10">
         <aside aria-label="Filters" className="lg:sticky lg:top-24 lg:self-start">
-          <FilterPanel facets={facets} activeCount={chips.length} resultCount={results.length} />
+          <FilterPanel facets={facets} activeCount={otherChips.length} resultCount={results.length} />
         </aside>
 
         <section aria-labelledby="results-title" className="min-w-0">
@@ -67,9 +73,9 @@ async function InventoryResults({ searchParams }: Pick<PageProps<"/inventory">, 
             <SortSelect />
           </div>
 
-          {chips.length > 0 && (
+          {otherChips.length > 0 && (
             <ul aria-label="Active filters" className="mt-3 flex flex-wrap gap-2">
-              {chips.map((chip) => (
+              {otherChips.map((chip) => (
                 <li key={chip.key}>
                   <Link
                     href={chip.href}

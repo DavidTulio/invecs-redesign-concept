@@ -69,7 +69,7 @@ export default async function BranchesPage({ searchParams }: PageProps<"/branche
           </li>
         ))}
 
-        <li className="grid content-start gap-3 rounded-card bg-soft p-6">
+        <li className="grid content-start gap-3 self-start rounded-card bg-soft p-6">
           <h2 className="font-wide text-xl font-bold">Prefer to book online?</h2>
           <p className="text-ink-2">
             Send a test-drive request with your preferred date and time. We&apos;ll confirm by call, Viber,

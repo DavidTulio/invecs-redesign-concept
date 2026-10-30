@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { SelectField } from "@/components/ui/SelectField";
-import type { Facets, Filters, Option } from "@/lib/filters";
+import { inventoryHref, type Facets, type Filters, type Option } from "@/lib/filters";
 import { useFilterNav } from "./FilterNav";
 
 type Field = Exclude<keyof Filters, "sort">;
@@ -12,6 +12,7 @@ type Field = Exclude<keyof Filters, "sort">;
 /**
  * One filter panel for the whole inventory. Every dropdown only lists options
  * that still have cars, each with its count. On phones it folds behind a button.
+ * Body type isn't here: it has its own chips above the results (BodyTypeChips).
  */
 export function FilterPanel({
   facets,
@@ -25,6 +26,8 @@ export function FilterPanel({
   const { filters, update } = useFilterNav();
   const [open, setOpen] = useState(false);
 
+  // Clears the panel's filters and the search; the body-type chip and the sort order stay.
+  const clearHref = inventoryHref({ sort: filters.sort, body: filters.body });
   const value = (field: Field) => (filters[field] === undefined ? "" : String(filters[field]));
   const set = (field: Field) => (next: string) =>
     update({
@@ -63,13 +66,12 @@ export function FilterPanel({
         <div className="hidden items-center justify-between lg:flex">
           <h2 className="font-wide text-lg font-bold">Filters</h2>
           {activeCount > 0 && (
-            <Link href="/inventory" scroll={false} className="text-sm font-semibold text-signal hover:underline">
+            <Link href={clearHref} scroll={false} className="text-sm font-semibold text-signal hover:underline">
               Clear all
             </Link>
           )}
         </div>
 
-        <FacetSelect label="Body type" name="body" anyLabel="Any body type" options={facets.body} value={value("body")} onChange={set("body")} />
         <FacetSelect label="Make" name="make" anyLabel="Any make" options={facets.make} value={value("make")} onChange={set("make")} />
         <FacetSelect
           label="Model"
@@ -105,7 +107,7 @@ export function FilterPanel({
 
         {activeCount > 0 && (
           <Link
-            href="/inventory"
+            href={clearHref}
             scroll={false}
             className="flex items-center justify-center gap-1.5 rounded-field py-2.5 text-sm font-semibold text-signal hover:underline lg:hidden"
           >
