@@ -13,7 +13,8 @@ const archivo = Archivo({
 const plex = IBM_Plex_Sans({
   variable: "--font-plex",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  // Regular and Semibold only: each weight is another file every visitor downloads.
+  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {

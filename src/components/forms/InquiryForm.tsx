@@ -64,6 +64,8 @@ export function InquiryForm({
   const formAttempt = state.attempt ?? 0;
   const token = issued.attempt === formAttempt ? issued.token : null;
   const [dismissedAttempt, setDismissedAttempt] = useState<number | null>(null);
+  // The human check starts on the first tap into the form, not when the page opens.
+  const [engaged, setEngaged] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
 
   const values = state.status === "error" ? (state.values ?? {}) : {};
@@ -124,7 +126,14 @@ export function InquiryForm({
   return (
     // A new key after every server reply re-creates the form with the visitor's
     // values (React clears forms after an action) and a fresh single-use CAPTCHA.
-    <form key={formAttempt} action={formAction} onSubmit={onSubmit} noValidate className="grid gap-5">
+    <form
+      key={formAttempt}
+      action={formAction}
+      onSubmit={onSubmit}
+      onFocus={() => setEngaged(true)}
+      noValidate
+      className="grid gap-5"
+    >
       <div ref={summaryRef} tabIndex={-1} className="outline-none" role="alert">
         {(serverMessage || errorCount > 0) && (
           <div className="rounded-field border border-signal/40 bg-[#fdecef] p-3 text-sm text-signal-dark">
@@ -207,7 +216,7 @@ export function InquiryForm({
           ))}
         </div>
         {errors.contact_method && (
-          <p id="contact_method-error" className="text-sm font-medium text-signal">
+          <p id="contact_method-error" className="text-sm font-semibold text-signal">
             {errors.contact_method}
           </p>
         )}
@@ -402,6 +411,7 @@ export function InquiryForm({
       <Turnstile
         siteKey={siteKey}
         action="inquiry"
+        load={engaged}
         onTokenChange={(next) => setIssued({ token: next, attempt: formAttempt })}
       />
 
@@ -412,11 +422,11 @@ export function InquiryForm({
 
       <button
         type="submit"
-        disabled={pending || !token}
+        disabled={pending || (engaged && !token)}
         className="flex items-center justify-center gap-2 rounded-field bg-signal px-6 py-3.5 font-semibold text-white hover:bg-signal-dark disabled:cursor-not-allowed disabled:bg-muted sm:justify-self-start"
       >
         <Send aria-hidden size={18} />
-        {pending ? "Sending…" : token ? (isQuestion ? "Send question" : "Send request") : "Checking you're human…"}
+        {pending ? "Sending…" : engaged && !token ? "Checking you're human…" : isQuestion ? "Send question" : "Send request"}
       </button>
     </form>
   );

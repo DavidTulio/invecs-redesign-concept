@@ -46,6 +46,8 @@ export function LoginForm({ siteKey, notice }: { siteKey: string; notice?: strin
       <Turnstile
         siteKey={siteKey}
         action="login"
+        // Signing in is the only thing to do on this page, so the check starts right away.
+        load
         onTokenChange={(next) => setIssued({ token: next, attempt: formAttempt })}
       />
       <button

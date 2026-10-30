@@ -117,7 +117,7 @@ export function CarForm({ initial }: { initial: CarFormValues }) {
             Feature on the home page
           </label>
           {e.featured ? (
-            <p id="featured-error" className="text-sm font-medium text-signal">
+            <p id="featured-error" className="text-sm font-semibold text-signal">
               {e.featured}
             </p>
           ) : (
