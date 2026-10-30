@@ -7,6 +7,9 @@ const PATHS: Record<BodyType, string> = {
     "M14 76 L20 52 Q24 42 36 40 L74 36 L96 14 Q100 10 110 10 L146 10 Q154 10 156 18 L160 42 L228 42 Q232 42 232 48 L232 76 Q232 82 226 82 L18 82 Q14 82 14 76 Z",
   sedan:
     "M12 74 L18 56 Q22 48 34 46 L76 40 L102 22 Q110 18 122 18 L160 18 Q172 18 180 26 L198 42 L222 48 Q230 50 230 60 L230 76 Q230 82 224 82 L18 82 Q12 82 12 74 Z",
+  // A sedan's front with a short, steep rear hatch instead of a boot.
+  hatchback:
+    "M16 74 L16 52 Q18 32 34 26 L62 18 Q70 16 80 16 L150 16 Q164 16 172 24 L196 42 L222 48 Q230 50 230 60 L230 76 Q230 82 224 82 L22 82 Q16 82 16 74 Z",
   van: "M14 76 L14 30 Q14 12 32 12 L200 12 Q212 12 218 22 L230 50 Q232 54 232 60 L232 76 Q232 82 226 82 L20 82 Q14 82 14 76 Z",
 };
 
@@ -17,7 +20,7 @@ export function CarSilhouette({
   type: BodyType;
   className?: string;
 }) {
-  const [front, rear] = type === "sedan" ? [58, 188] : [62, 188];
+  const [front, rear] = type === "sedan" || type === "hatchback" ? [58, 188] : [62, 188];
   return (
     <svg viewBox="0 0 244 104" className={className} aria-hidden focusable="false">
       <path fill="currentColor" d={PATHS[type]} />

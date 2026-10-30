@@ -92,7 +92,7 @@ export function CarForm({ initial }: { initial: CarFormValues }) {
         {text("color", "Colour")}
         {select("transmission", "Transmission", TRANSMISSIONS, TRANSMISSION_LABELS)}
         {select("fuel", "Fuel", FUELS, FUEL_LABELS)}
-        {text("mileage_km", "Mileage (km)", { required: true, inputMode: "numeric" })}
+        {text("mileage_km", "Mileage (km)", { inputMode: "numeric", hint: "Leave empty if unknown; buyers see \"Ask us\"." })}
       </fieldset>
 
       <fieldset className="grid gap-4 sm:grid-cols-3">

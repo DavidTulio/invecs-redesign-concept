@@ -24,3 +24,8 @@ export function formatPesoShort(amount: number) {
 export function formatKm(km: number) {
   return `${number.format(km)} km`;
 }
+
+/** Mileage for cards and tables: "48,000 km", or "Mileage on request" when the listing doesn't say. */
+export function mileageLabel(km: number | null) {
+  return km === null ? "Mileage on request" : formatKm(km);
+}

@@ -71,3 +71,18 @@ describe("allSame and featureUnion", () => {
     ]);
   });
 });
+
+describe("bestByRow with unknown mileage", () => {
+  it("ignores cars without a stated mileage", () => {
+    const best = bestByRow([
+      { slug: "x", price_php: 1, mileage_km: null, year: 2020 },
+      { slug: "y", price_php: 2, mileage_km: 50_000, year: 2020 },
+      { slug: "z", price_php: 3, mileage_km: 30_000, year: 2020 },
+    ]);
+    expect([...best.mileage]).toEqual(["z"]);
+  });
+
+  it("marks nothing when only one car has a known mileage", () => {
+    expect(bestByRow([{ slug: "x", price_php: 1, mileage_km: null, year: 2020 }, { slug: "y", price_php: 2, mileage_km: 9, year: 2020 }]).mileage.size).toBe(0);
+  });
+});

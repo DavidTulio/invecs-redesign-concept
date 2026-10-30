@@ -191,7 +191,8 @@ const sorters: Record<SortKey, (a: Car, b: Car) => number> = {
   newest: (a, b) => b.created_at.localeCompare(a.created_at),
   "price-asc": (a, b) => a.price_php - b.price_php,
   "price-desc": (a, b) => b.price_php - a.price_php,
-  "mileage-asc": (a, b) => a.mileage_km - b.mileage_km,
+  // Cars without a stated mileage go last.
+  "mileage-asc": (a, b) => (a.mileage_km ?? Infinity) - (b.mileage_km ?? Infinity),
   "year-desc": (a, b) => b.year - a.year || a.price_php - b.price_php,
 };
 

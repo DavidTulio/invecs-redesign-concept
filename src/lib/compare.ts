@@ -32,11 +32,13 @@ export type BestKey = "price" | "mileage" | "year";
  * A row has no winner when there's only one car or every car ties.
  */
 export function bestByRow(cars: Pick<Car, "slug" | "price_php" | "mileage_km" | "year">[]) {
-  const pick = (value: (car: (typeof cars)[number]) => number, want: "min" | "max") => {
-    const values = cars.map(value);
+  // Cars with an unknown value (no stated mileage) can't win, and don't count as a tie.
+  const pick = (value: (car: (typeof cars)[number]) => number | null, want: "min" | "max") => {
+    const known = cars.filter((car) => value(car) !== null);
+    const values = known.map((car) => value(car) as number);
     const target = want === "min" ? Math.min(...values) : Math.max(...values);
-    const winners = cars.filter((car) => value(car) === target).map((car) => car.slug);
-    return cars.length > 1 && winners.length < cars.length ? new Set(winners) : new Set<string>();
+    const winners = known.filter((car) => value(car) === target).map((car) => car.slug);
+    return known.length > 1 && winners.length < known.length ? new Set(winners) : new Set<string>();
   };
   return {
     price: pick((car) => car.price_php, "min"),

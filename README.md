@@ -1,6 +1,6 @@
 # INVECS Autocentrum: redesign concept
 
-> **Unofficial redesign concept by David Tulio. Not affiliated with INVECS Autocentrum.**
+> **Not the official INVECS Autocentrum website.** A concept by David Tulio, shown with the permission of INVECS Autocentrum (signed October 28, 2026).
 > For the real dealer, visit [invecs.ph](https://www.invecs.ph/).
 
 A full-stack, mobile-first redesign of a Philippine used-car dealer's website, built for my portfolio.
@@ -53,20 +53,24 @@ Each layer was tested with real attack attempts (direct API calls, tampered requ
 
 ## Concept safeguards
 
-- A banner on every page says this is an unofficial concept and links to the official site.
+- A banner on every page says this is not the official INVECS Autocentrum website, that it is shown with permission, and links to the official site.
 - Every page sends `noindex, nofollow` (meta tag and `X-Robots-Tag` header), and `robots.txt` disallows all crawlers except chat apps' link-preview robots (Messenger/Facebook, Viber, WhatsApp, Telegram). Those may read public pages, never `/admin`, so a shared car shows its photo, name and price; the preview itself says "redesign concept", and noindex keeps it out of search indexes.
 - The logo is a plain text wordmark; no logo or photos are copied from the dealer.
 - Inquiry forms run in demo mode and don't reach the dealer.
 
-## Sample data
+## Listings and permission
 
-All cars, prices, mileages and descriptions are **sample data** ([`scripts/seed-data.ts`](scripts/seed-data.ts)), modelled on the kinds of cars the dealer lists. They are not real listings.
+INVECS Autocentrum gave written permission (October 28, 2026) to use its **name and brand, logo, and car photos from its website and social media pages** in this personal project and portfolio. The live site lists INVECS's own cars and photos, taken from its Facebook page; details a listing doesn't state are shown as "Ask us". Prices and availability may be out of date, so buyers are asked to confirm with INVECS.
+
+[`scripts/seed-data.ts`](scripts/seed-data.ts) still holds **sample cars** (with the Unsplash photos credited below) for local development and testing.
 
 ## Photo and 3D model credits
 
 3D cars in "Shop by body type": the SUV, pickup and sedan from ["Generic passenger car pack"](https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5) by comrade1280, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: taken out of the pack, textures removed and recoloured grey, turned to face forward, a turntable disc added, and compressed (`public/models/`). The still pictures in `src/assets/showroom/` are renders of the same models.
 
-Car photos are from [Unsplash](https://unsplash.com) and used under the [Unsplash License](https://unsplash.com/license). Each photo was checked to show the same model as its sample listing, but it is not the actual car for sale.
+Listing photos on the live site: **INVECS Autocentrum**, used with permission.
+
+Sample-data photos (development seed only) are from [Unsplash](https://unsplash.com) and used under the [Unsplash License](https://unsplash.com/license). Each photo was checked to show the same model as its sample listing, but it is not the actual car for sale.
 
 Home page header photo: [Ivan Kazlouskij](https://unsplash.com/photos/euFJPwObDWI) (dealer lot).
 

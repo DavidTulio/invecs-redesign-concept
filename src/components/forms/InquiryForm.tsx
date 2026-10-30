@@ -26,6 +26,7 @@ const INITIAL: InquiryState = { status: "idle" };
 export function InquiryForm({
   cars,
   defaultCar,
+  defaultMessage,
   formStamp,
   minDate,
   maxDate,
@@ -33,6 +34,8 @@ export function InquiryForm({
 }: {
   cars: CarOption[];
   defaultCar?: string;
+  /** A question already written for the buyer (from "Ask for more details"). */
+  defaultMessage?: string;
   formStamp: string;
   minDate: string;
   maxDate: string;
@@ -49,7 +52,7 @@ export function InquiryForm({
 
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const [method, setMethod] = useState<ContactMethod>((values.contact_method as ContactMethod) || "call");
-  const [messageLength, setMessageLength] = useState((values.message ?? "").length);
+  const [messageLength, setMessageLength] = useState((values.message ?? defaultMessage ?? "").length);
   const [tradeIn, setTradeIn] = useState(values.trade_in === "yes");
 
   const errors = clientErrors ?? (state.status === "error" ? state.errors : undefined) ?? {};
@@ -247,7 +250,7 @@ export function InquiryForm({
           name="message"
           rows={4}
           maxLength={MESSAGE_MAX}
-          defaultValue={values.message}
+          defaultValue={values.message ?? defaultMessage}
           onChange={(event) => setMessageLength(event.target.value.length)}
           placeholder="Questions about the car or financing"
           className={`${inputClass} resize-y`}

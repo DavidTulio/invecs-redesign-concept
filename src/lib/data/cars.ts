@@ -7,7 +7,7 @@ export const CARS_TAG = "cars";
 
 const CAR_COLUMNS = `
   id, slug, make, model, variant, year, body_type, transmission, fuel,
-  mileage_km, price_php, color, description, features, status, featured, created_at,
+  mileage_km, price_php, color, description, features, status, featured, card_photo, photo_price, created_at,
   car_photos ( path, position, alt, credit_name, credit_url )
 `;
 

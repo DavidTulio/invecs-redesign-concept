@@ -33,6 +33,8 @@ function car(overrides: Partial<Car>): Car {
     features: [],
     status: "available",
     featured: false,
+    card_photo: null,
+    photo_price: null,
     created_at: `2026-10-${String(id).padStart(2, "0")}T00:00:00Z`,
     photos: [],
     ...overrides,
