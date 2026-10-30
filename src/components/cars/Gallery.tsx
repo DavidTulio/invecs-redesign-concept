@@ -78,7 +78,8 @@ export function Gallery({ photos, bodyType, title }: { photos: CarPhoto[]; bodyT
           <button
             type="button"
             onClick={() => openFull(index)}
-            className="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink"
+            // Bottom-left, so it never covers the logo INVECS puts top-right on its posters.
+            className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink"
           >
             <Expand aria-hidden size={14} />
             Full view
