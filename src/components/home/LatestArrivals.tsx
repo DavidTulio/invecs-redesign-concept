@@ -37,6 +37,19 @@ export function LatestArrivals({ cars, total }: { cars: Car[]; total: number }) 
               <CarCard car={car} showFeatured />
             </li>
           ))}
+          {/* Phones: whoever swipes to the end wants more cars, so the next step waits there.
+              Desktop shows the grid with the link above it in view, so it isn't needed. */}
+          <li className="flex max-sm:w-[60%] max-sm:shrink-0 max-sm:snap-start sm:hidden">
+            <Link
+              href="/inventory"
+              className="flex w-full flex-col items-center justify-center gap-3 rounded-card border border-line bg-paper p-6 text-center font-semibold text-signal hover:border-ink"
+            >
+              <span className="grid size-12 place-items-center rounded-full bg-soft">
+                <ArrowRight aria-hidden size={22} />
+              </span>
+              View all {total} cars
+            </Link>
+          </li>
         </ul>
       </div>
     </section>
