@@ -3,6 +3,8 @@
 //
 // Uses the SECRET key, which bypasses Row Level Security, so it only ever runs
 // on your own computer. Safe to run again: it replaces the sample data.
+// It refuses to run if the database holds any car that isn't a sample car,
+// so it can never delete real listings.
 
 import { createClient } from "@supabase/supabase-js";
 import { carSlug } from "../src/lib/slug.ts";
@@ -38,13 +40,17 @@ async function main() {
   const now = Date.now();
   const slugs = seedCars.map(carSlug);
 
-  // 1. Remove cars that are no longer in the seed list (photos rows cascade).
-  const { data: existing, error: listError } = await supabase.from("cars").select("id, slug");
+  // 1. Stop before changing anything if the database holds cars that aren't sample cars.
+  const { data: existing, error: listError } = await supabase.from("cars").select("slug");
   fail("Reading cars (did you run the migration SQL?)", listError);
-  const stale = (existing ?? []).filter((car) => !slugs.includes(car.slug));
-  if (stale.length) {
-    const { error } = await supabase.from("cars").delete().in("id", stale.map((car) => car.id));
-    fail("Removing old cars", error);
+  const others = (existing ?? []).filter((car) => !slugs.includes(car.slug));
+  if (others.length) {
+    console.error(
+      `✗ This database has ${others.length} car${others.length === 1 ? "" : "s"} that aren't sample cars ` +
+        `(for example ${others[0].slug}). The seed only runs on an empty database or one with ` +
+        `sample cars only. Nothing was changed.`,
+    );
+    process.exit(1);
   }
 
   for (const [index, seed] of seedCars.entries()) {
