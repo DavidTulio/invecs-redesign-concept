@@ -24,9 +24,12 @@ export const TEST_DRIVE_LINK = { href: "/test-drive", label: "Book a test drive"
  */
 export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
 
-/** The dealer's official contact details, from invecs.ph/contact-us. Shown as plain text only. */
+/**
+ * The dealer's official contact details, from invecs.ph/contact-us plus the number on their
+ * current Facebook posters (listed first). Shown as plain text only.
+ */
 export const OFFICIAL_CONTACT = {
-  phones: ["+63 920 963 3858", "+63 917 510 3858", "+63 945 963 3858", "+63 922 338 9885"],
+  phones: ["+63 960 840 6747", "+63 920 963 3858", "+63 917 510 3858", "+63 945 963 3858", "+63 922 338 9885"],
   emails: ["invecsauto@gmail.com", "invecsauto@yahoo.com"],
   facebook: "https://www.facebook.com/Invecs-Autocentrum-142362912502027/",
 } as const;
