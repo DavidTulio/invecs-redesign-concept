@@ -99,9 +99,14 @@ export async function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="container-site flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-4 text-xs text-[#9aa5b5]">
           <p>© {year} David Tulio · Concept website, not the official INVECS Autocentrum site.</p>
-          <a href={OFFICIAL_SITE_URL} className="py-1 text-white underline underline-offset-2" rel="noopener">
-            Official INVECS site
-          </a>
+          <div className="flex gap-x-5">
+            <Link href="/privacy" className="py-1 text-white underline underline-offset-2">
+              Privacy
+            </Link>
+            <a href={OFFICIAL_SITE_URL} className="py-1 text-white underline underline-offset-2" rel="noopener">
+              Official INVECS site
+            </a>
+          </div>
         </div>
       </div>
     </footer>

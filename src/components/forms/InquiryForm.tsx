@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { CheckCircle2, Send } from "lucide-react";
 import { submitInquiry, type InquiryState } from "@/actions/inquiry";
 import { formatPeso } from "@/lib/format";
@@ -417,7 +418,11 @@ export function InquiryForm({
 
       <p className="text-xs leading-relaxed text-muted">
         <strong className="font-semibold text-ink-2">Privacy:</strong> we only use these details to answer
-        this request. They are deleted automatically after 30 days and are never shared.
+        this request. They are deleted automatically after 30 days and are never shared.{" "}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-ink">
+          Read our privacy notice
+        </Link>
+        .
       </p>
 
       <button

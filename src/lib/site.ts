@@ -12,6 +12,9 @@ export const NAV_LINKS = [
   { href: "/branches", label: "Branches & contact" },
 ] as const;
 
+/** Where visitors send privacy requests (see, correct or delete their details). Public on /privacy. */
+export const PRIVACY_EMAIL = "djetulio81004@gmail.com";
+
 export const TEST_DRIVE_LINK = { href: "/test-drive", label: "Book a test drive" } as const;
 
 /**
