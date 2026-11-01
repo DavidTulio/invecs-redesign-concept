@@ -29,7 +29,7 @@ A full-stack, mobile-first redesign of a Philippine used-car dealer's website, b
 
 ```bash
 npm install
-npm run db:seed   # loads the sample cars and uploads their photos
+npm run db:seed   # loads the sample cars into an empty database (refuses if real cars exist)
 npm run dev       # http://localhost:3000
 npm test          # unit tests (loan maths, form rules, filters, car schema)
 ```
