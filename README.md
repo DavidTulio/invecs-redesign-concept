@@ -1,19 +1,96 @@
 # INVECS Autocentrum: redesign concept
 
-> **Not the official INVECS Autocentrum website.** A concept by David Tulio, shown with the permission of INVECS Autocentrum (signed October 28, 2026).
-> For the real dealer, visit [invecs.ph](https://www.invecs.ph/).
+A full-stack, mobile-first rebuild of a Philippine used-car dealer's website: a public site where buyers browse, compare, estimate monthly payments and book test drives, and a private admin where staff manage cars and inquiries.
 
-A full-stack, mobile-first redesign of a Philippine used-car dealer's website, built for my portfolio.
+**Live concept:** [invecs-redesign-concept.vercel.app](https://invecs-redesign-concept.vercel.app)
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Supabase · Zod · Cloudflare Turnstile · Vitest · Vercel
+> **Not the official INVECS Autocentrum website.** An unofficial concept by David Tulio, shown with the written permission of INVECS Autocentrum (October 28, 2026). It is hidden from search engines, and its forms don't reach the dealer. For the real dealer, visit [invecs.ph](https://www.invecs.ph/).
 
-## Status
+![Car page on desktop: photo gallery, full price, monthly estimate and a Book a test drive button](docs/images/car-page-desktop.webp)
 
-- [x] Phase 1: setup, design tokens, layout, header/footer, home page
-- [x] Phase 2: database, Row Level Security, seed data, inventory filters, car pages
-- [x] Phase 3: loan calculator, inquiry form with spam protection, branches page
-- [x] Phase 4: admin (login, cars and photos, inquiries inbox, dashboard)
-- [ ] Phase 5: polish, security check and case study
+<p>
+  <img src="docs/images/home-phone.webp" width="240" alt="Home page on a phone: latest arrivals as a swipe row with prices and monthly estimates">
+  <img src="docs/images/car-page-phone.webp" width="240" alt="Car page on a phone: photo, price and monthly estimate">
+  <img src="docs/images/loan-calculator-phone.webp" width="240" alt="Loan calculator on a phone">
+</p>
+
+## My role and timeline
+
+Built solo by **David Tulio**, BS Information Technology student at Holy Angel University, from October 16 to November 1, 2026: planning, design, front end, back end, database, security, testing and deployment. I also contacted INVECS, visited their office and got written permission to use their name, logo and car photos, so the site shows their real stock.
+
+## Before and after
+
+<p>
+  <img src="docs/images/before-home-phone.webp" width="240" alt="The original INVECS home page on a phone: a dark, cluttered header and a large banner">
+  <img src="docs/images/home-phone.webp" width="240" alt="The redesigned home page on a phone">
+</p>
+
+| Measure (home page, phone) | Original site | Redesign |
+|---|---|---|
+| Download size | 10.8 MB | **0.68 MB** (16× lighter) |
+| Lighthouse performance | 43 | **84** |
+| Lighthouse accessibility | 78 | **100** on every page |
+| Lighthouse best practices | 57 | **100** on every page |
+| Layout shift while loading (CLS) | 0.32 (poor) | **0.00** |
+| Largest content visible (LCP) | 7.6 s | **4.1 s** |
+
+Lighthouse numbers are medians of three runs on a simulated mid-range phone on slow 4G, measured on the live sites.
+
+## What it does
+
+**For buyers**
+
+- Inventory with text search ("7 seater", "diesel pickup"), body-type chips, filters and sorting, in pages of 12.
+- Every car shows its **full price and a monthly estimate**; the loan calculator uses the add-on rate Philippine banks quote and shows total interest and total paid.
+- Photo gallery with a full-screen view, saved cars and a side-by-side compare, all without an account.
+- Test-drive booking that only offers days the showroom is open (with an optional trade-in), and a question form for everything else.
+- Share a car to Messenger or Viber with a proper link preview.
+- A 3D body-type showroom that loads only when it's on screen.
+
+**For staff (admin)**
+
+- Add and edit cars, upload and reorder photos (credit and descriptions added automatically).
+- Featured cars, sold status and private staff notes.
+- An inquiries inbox and a CSV export that's safe to open in Excel.
+- Changes go live on the site immediately.
+
+## How it's built
+
+**Stack:** Next.js 16 (App Router, Server Actions, cached components) · React 19 · TypeScript · Tailwind CSS 4 · Supabase (Postgres, Auth, Storage) · Zod · Cloudflare Turnstile · Vitest · Vercel · GitHub Actions
+
+![Architecture: the browser talks to Next.js on Vercel, which reads and writes Supabase Postgres and Storage; Cloudflare Turnstile checks forms](docs/images/architecture.webp)
+
+Pages are pre-built and cached, then refreshed the moment staff save a change. Only the parts that must be live (forms, the admin) run per request.
+
+## Security highlights
+
+- **Admin protected three times on every request:** a proxy check, a server-side admin check in every page and action, and Row Level Security in Postgres as the last line.
+- **Visitors can't write to the database directly.** Only the server saves inquiries, after every check below.
+- **Form defences, cheapest first:** hidden honeypot field, a signed "too fast" time stamp, a rate limit (5 per 10 minutes, IP stored only as a one-way hash), Cloudflare Turnstile, then validation in the browser, on the server and in the database.
+- **Security headers:** a strict Content Security Policy, HSTS, no embedding in other sites, and camera, microphone and location off.
+- **Safe scripts:** the sample-data command refuses to run on a database with real listings.
+- **Privacy:** only the fields needed to reply, inquiries deleted after 30 days, no tracking cookies, and a plain-language [privacy notice](https://invecs-redesign-concept.vercel.app/privacy) written with the Data Privacy Act (RA 10173) in mind.
+
+The full update routine and security log are in [SECURITY.md](SECURITY.md).
+
+## Testing and quality
+
+- **126 unit tests** (Vitest) for loan maths, form rules, filters and the car schema.
+- **CI on every pull request** (GitHub Actions): type checks, lint, tests, `npm audit` and package signature checks; Dependabot for updates; exact package versions.
+- **14 of 14 attack tests blocked** on the contact form: injections, forged fields, floods, failed CAPTCHAs and direct database calls.
+- **0 accessibility issues** in axe scans of every page, at phone and desktop sizes.
+- Every change went through a branch, a Vercel preview checked on a real phone, and green CI before merging.
+
+## How I used AI
+
+I built this with **Claude Code**, an AI coding assistant, as a pair programmer. I set the direction and rules, approved or rejected every plan and design, tested every preview on my phone, ran the database migrations and managed the accounts and keys. The AI proposed plans, wrote most of the code and tests, and ran the checks. It wasn't always right, so every claim was verified before merging: I treat AI output like a colleague's pull request.
+
+## What I learned
+
+- **Measure first.** Tuning only worked because I measured before and after each change, which also showed which fix didn't help.
+- **Security is layers.** Each defence assumes the one before it failed.
+- **Mobile first means real phones.** Several problems only showed up when using the site like a buyer.
+- **Talk to the client.** Asking for permission turned a mock-up into a site with real stock and a real stakeholder.
 
 ## Run it locally
 
@@ -31,48 +108,23 @@ A full-stack, mobile-first redesign of a Philippine used-car dealer's website, b
 npm install
 npm run db:seed   # loads the sample cars into an empty database (refuses if real cars exist)
 npm run dev       # http://localhost:3000
-npm test          # unit tests (loan maths, form rules, filters, car schema)
+npm test          # unit tests
 ```
 
-`npm run build`, `npm run lint` and `npm test` must pass before every commit.
+`npm run build`, `npm run lint` and `npm test` must pass before every commit. Test the admin on a production build (`npm run build && npm run start`).
 
-## Inquiry form security
+## Credits and permission
 
-Each layer was tested with real attack attempts (direct API calls, tampered requests, bots and floods).
+INVECS Autocentrum gave written permission (October 28, 2026) to use its **name and brand, logo, and car photos from its website and social media pages** in this personal project and portfolio. Listing photos on the live site: **INVECS Autocentrum**, used with permission. Prices and availability may be out of date, so buyers are asked to confirm with INVECS.
 
-| Threat | Protection |
-|---|---|
-| Bypassing the website and writing to the database directly | Visitors have no insert permission on `inquiries`; only the server (secret key) saves, after every check below |
-| SQL injection | Values are sent separately from the query (parameterised by Supabase/PostgREST); no SQL is built from input |
-| Spam bots | Cloudflare Turnstile verified on the server, hidden honeypot field, signed "too fast" time stamp |
-| Flooding | 5 attempts per visitor per 10 minutes, counted atomically in Postgres; IPs stored only as an HMAC hash |
-| Bad or oversized input | One Zod schema checked in the browser and again on the server, plus database constraints |
-| Script injection (XSS) | React renders input as text; Content Security Policy limits scripts to this site and Cloudflare |
-| Cross-site form posts (CSRF) | Next.js Server Actions reject requests from other origins |
-| Privacy | Only needed fields; inquiries auto-delete after 30 days |
+3D cars in the body-type showroom: the SUV, pickup, sedan, hatchback and minivan from ["Generic passenger car pack"](https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5) by comrade1280, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: taken out of the pack, textures removed and recoloured grey, turned to face forward, a turntable disc added, and compressed (`public/models/`). The still pictures in `src/assets/showroom/` are renders of the same models.
 
-## Concept safeguards
+Home page header photo: [Ivan Kazlouskij](https://unsplash.com/photos/euFJPwObDWI) (dealer lot), [Unsplash License](https://unsplash.com/license).
 
-- A banner on every page says this is not the official INVECS Autocentrum website, that it is shown with permission, and links to the official site.
-- Every page sends `noindex, nofollow` (meta tag and `X-Robots-Tag` header), and `robots.txt` disallows all crawlers except chat apps' link-preview robots (Messenger/Facebook, Viber, WhatsApp, Telegram). Those may read public pages, never `/admin`, so a shared car shows its photo, name and price; the preview itself says "redesign concept", and noindex keeps it out of search indexes.
-- The INVECS Autocentrum logo is used with permission: the original white-and-red version on dark backgrounds, and a navy-and-red version on the white header.
-- Inquiry forms run in demo mode and don't reach the dealer.
+<details>
+<summary>Sample-data photos (development seed only)</summary>
 
-## Listings and permission
-
-INVECS Autocentrum gave written permission (October 28, 2026) to use its **name and brand, logo, and car photos from its website and social media pages** in this personal project and portfolio. The live site lists INVECS's own cars and photos, taken from its Facebook page; details a listing doesn't state are shown as "Ask us". Prices and availability may be out of date, so buyers are asked to confirm with INVECS.
-
-[`scripts/seed-data.ts`](scripts/seed-data.ts) still holds **sample cars** (with the Unsplash photos credited below) for local development and testing.
-
-## Photo and 3D model credits
-
-3D cars in "Shop by body type": the SUV, pickup, sedan, hatchback and minivan from ["Generic passenger car pack"](https://sketchfab.com/3d-models/20f9af9b8a404d5cb022ac6fe87f21f5) by comrade1280, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: taken out of the pack, textures removed and recoloured grey, turned to face forward, a turntable disc added, and compressed (`public/models/`). The still pictures in `src/assets/showroom/` are renders of the same models.
-
-Listing photos on the live site: **INVECS Autocentrum**, used with permission.
-
-Sample-data photos (development seed only) are from [Unsplash](https://unsplash.com) and used under the [Unsplash License](https://unsplash.com/license). Each photo was checked to show the same model as its sample listing, but it is not the actual car for sale.
-
-Home page header photo: [Ivan Kazlouskij](https://unsplash.com/photos/euFJPwObDWI) (dealer lot).
+[`scripts/seed-data.ts`](scripts/seed-data.ts) holds sample cars for local development. Their photos are from [Unsplash](https://unsplash.com), used under the [Unsplash License](https://unsplash.com/license). Each was checked to show the same model as its sample listing, but it is not the actual car for sale.
 
 | Car | Photographer |
 |---|---|
@@ -101,22 +153,4 @@ Home page header photo: [Ivan Kazlouskij](https://unsplash.com/photos/euFJPwObDW
 | 1998 Ford F-150 XLT SuperCab | [Dan Williams](https://unsplash.com/photos/dyKsaQ2JfQQ) |
 | 2021 Nissan Navara VL 2.5 4x4 | [Šimom Caban](https://unsplash.com/photos/NrBc2oOaKU8) |
 
-## Keeping it secure
-
-Dependencies are pinned to exact versions, Dependabot opens pull requests for updates, and a GitHub Actions check runs `npm audit`, type checks, lint and tests on every push and every Monday. See [SECURITY.md](SECURITY.md) for the update routine and the security update log.
-
-## Admin security
-
-The admin area (`/admin`) is checked three times on every request:
-
-1. **Proxy** (`src/proxy.ts`): sends signed-out visitors to the login page and keeps the session fresh.
-2. **`requireAdmin()`** at the top of every admin page and Server Action: verifies the login token and that the user is listed in `admins`.
-3. **Row Level Security** in Postgres: even with a valid login, only admins can change cars, photos or inquiries.
-
-Tested by calling admin Server Actions directly by ID while signed out, and by signing in as a non-admin user and calling the database API: every attempt was refused. Photo uploads are checked by their first bytes (JPG/PNG/WebP only, 5 MB max) and stored under random names.
-
-## Notes for the case study
-
-Problems found on the original site, beyond the brief's list:
-
-- On the contact page, the link labelled "+63917-510-3858" actually dials +63920-963-3858.
+</details>
